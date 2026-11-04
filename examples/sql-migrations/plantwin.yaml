@@ -1,0 +1,16 @@
+version: 1
+image: plantwin-postgres:18
+migrations:
+  tool: sql
+  path: migrations
+queries:
+  - name: customer_lookup
+    file: queries/customer_lookup.sql
+  - name: open_orders_count
+    file: queries/open_orders_count.sql
+redaction:
+  default: hash
+fail_on: warning
+bundle:
+  path: plantwin-bundle.json
+  public_key: plantwin.pub

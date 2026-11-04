@@ -1,0 +1,205 @@
+{
+  "run": {
+    "Base": "HEAD~1",
+    "Head": "HEAD",
+    "Queries": [
+      {
+        "name": "customer_lookup",
+        "findings": [
+          {
+            "rule": "lost_index",
+            "severity": "error",
+            "query": "customer_lookup",
+            "relation": "orders",
+            "message": "Index use lost on orders: a selective index is now unused, and the table is read by a sequential scan (about 500K rows).",
+            "why": "Queries on this table used a selective index. Without it, PostgreSQL reads every row of the table.",
+            "fix": "Recreate the index, or add it back in this migration. To accept the change, run `plantwin accept`.",
+            "estimated": true,
+            "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)",
+            "new_plan": "Gather(Seq Scan on orders)"
+          },
+          {
+            "rule": "cost_ratio",
+            "severity": "info",
+            "query": "customer_lookup",
+            "message": "Estimated total cost rose 60.6x (128 to 7774).",
+            "why": "Cost is an estimate. A large rise is a signal to look, not proof of a slowdown.",
+            "fix": "Compare the two plans below and verify on a representative workload.",
+            "estimated": false,
+            "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)",
+            "new_plan": "Gather(Seq Scan on orders)"
+          }
+        ]
+      },
+      {
+        "name": "open_orders_count",
+        "findings": null
+      }
+    ],
+    "Timing": [
+      {
+        "name": "load",
+        "duration_ms": 40
+      },
+      {
+        "name": "twins",
+        "duration_ms": 2399
+      },
+      {
+        "name": "import",
+        "duration_ms": 53
+      },
+      {
+        "name": "explain",
+        "duration_ms": 18
+      },
+      {
+        "name": "total",
+        "duration_ms": 2512
+      }
+    ],
+    "Estimated": [
+      "orders"
+    ],
+    "Warnings": [
+      "1 statistics object(s) on HEAD could not be restored (usually expected for objects the migration changed); they are estimated. First: relation public.orders_customer_idx: ERROR: relation \"public.orders_customer_idx\" does not exist (SQLSTATE 42P01)"
+    ],
+    "FailOn": "warning"
+  },
+  "plans": [
+    {
+      "name": "customer_lookup",
+      "base": {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "orders",
+        "Alias": "orders",
+        "Startup Cost": 4.68,
+        "Total Cost": 128.28,
+        "Plan Rows": 33,
+        "Plan Width": 21,
+        "Plans": [
+          {
+            "Node Type": "Bitmap Index Scan",
+            "Index Name": "orders_customer_idx",
+            "Parent Relationship": "Outer",
+            "Startup Cost": 0,
+            "Total Cost": 4.67,
+            "Plan Rows": 33,
+            "Plan Width": 0,
+            "Index Cond": "(customer_id = 4242)"
+          }
+        ]
+      },
+      "head": {
+        "Node Type": "Gather",
+        "Startup Cost": 1000,
+        "Total Cost": 7774.47,
+        "Plan Rows": 33,
+        "Plan Width": 21,
+        "Plans": [
+          {
+            "Node Type": "Seq Scan",
+            "Relation Name": "orders",
+            "Alias": "orders",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": true,
+            "Startup Cost": 0,
+            "Total Cost": 6771.17,
+            "Plan Rows": 14,
+            "Plan Width": 21,
+            "Filter": "(customer_id = 4242)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "open_orders_count",
+      "base": {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Startup Cost": 7944.99,
+        "Total Cost": 7945,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Plans": [
+          {
+            "Node Type": "Gather",
+            "Parent Relationship": "Outer",
+            "Startup Cost": 7944.78,
+            "Total Cost": 7944.99,
+            "Plan Rows": 2,
+            "Plan Width": 8,
+            "Plans": [
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Parent Relationship": "Outer",
+                "Startup Cost": 6944.78,
+                "Total Cost": 6944.79,
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Relation Name": "orders",
+                    "Alias": "orders",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": true,
+                    "Startup Cost": 0,
+                    "Total Cost": 6771.17,
+                    "Plan Rows": 69445,
+                    "Plan Width": 0,
+                    "Filter": "(status = 'open'::text)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "head": {
+        "Node Type": "Aggregate",
+        "Strategy": "Plain",
+        "Startup Cost": 7944.99,
+        "Total Cost": 7945,
+        "Plan Rows": 1,
+        "Plan Width": 8,
+        "Plans": [
+          {
+            "Node Type": "Gather",
+            "Parent Relationship": "Outer",
+            "Startup Cost": 7944.78,
+            "Total Cost": 7944.99,
+            "Plan Rows": 2,
+            "Plan Width": 8,
+            "Plans": [
+              {
+                "Node Type": "Aggregate",
+                "Strategy": "Plain",
+                "Parent Relationship": "Outer",
+                "Startup Cost": 6944.78,
+                "Total Cost": 6944.79,
+                "Plan Rows": 1,
+                "Plan Width": 8,
+                "Plans": [
+                  {
+                    "Node Type": "Seq Scan",
+                    "Relation Name": "orders",
+                    "Alias": "orders",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": true,
+                    "Startup Cost": 0,
+                    "Total Cost": 6771.17,
+                    "Plan Rows": 69445,
+                    "Plan Width": 0,
+                    "Filter": "(status = 'open'::text)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

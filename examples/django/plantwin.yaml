@@ -1,0 +1,25 @@
+version: 1
+image: plantwin-postgres:18
+
+# Django applies its own migrations. PlanTwin runs the command on the host, with DATABASE_URL pointing at the twin.
+# The host needs Python, Django and this project's requirements installed.
+migrations:
+  tool: command
+  command: "python manage.py migrate"
+
+queries:
+  - name: customer_lookup
+    sql: "SELECT id, status, total FROM shop_order WHERE customer_id = 4242"
+  - name: open_orders_count
+    sql: "SELECT count(*) FROM shop_order WHERE status = 'open'"
+
+redaction:
+  default: hash
+  columns:
+    shop_order.status: keep
+
+fail_on: warning
+
+bundle:
+  path: plantwin-bundle.json
+  public_key: plantwin.pub

@@ -1,0 +1,44 @@
+# GitLab CI template for PlanTwin. Include it from your .gitlab-ci.yml:
+#
+#   include:
+#     - local: action/gitlab-ci.yml   # or the URL of this file at a reviewed tag
+#   variables:
+#     PLANTWIN_VERSION: v0.1.0
+#
+# The job runs only on merge requests. It needs a Docker daemon (the docker:dind service) and the twin image.
+# Never give the export DSN to merge requests from forks.
+
+variables:
+  PLANTWIN_VERSION: "v0.1.0"
+  PLANTWIN_BASE: "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
+
+.plantwin:
+  image: docker:27
+  services:
+    - docker:27-dind
+  before_script:
+    - apk add --no-cache curl tar coreutils git
+    - curl -fsSL -o plantwin.tar.gz "https://gitlab.com/api/v4/projects/${PLANTWIN_PROJECT_ID}/packages/generic/plantwin/${PLANTWIN_VERSION}/plantwin_linux_amd64.tar.gz"
+    - curl -fsSL -o checksums.txt "https://gitlab.com/api/v4/projects/${PLANTWIN_PROJECT_ID}/packages/generic/plantwin/${PLANTWIN_VERSION}/checksums.txt"
+    - grep " plantwin_linux_amd64.tar.gz$" checksums.txt | sha256sum -c -
+    - tar -xzf plantwin.tar.gz plantwin
+    # The twin image must be available to this Docker daemon. Pull it from your registry, for example:
+    #   docker pull "$PLANTWIN_IMAGE" && docker tag "$PLANTWIN_IMAGE" plantwin-postgres:18
+    # Set PLANTWIN_IMAGE to an image built from this repository's Dockerfile (plantwin-postgres:18 or your copy).
+    - test -n "$PLANTWIN_IMAGE" && docker pull "$PLANTWIN_IMAGE" && docker tag "$PLANTWIN_IMAGE" plantwin-postgres:18
+
+plantwin-check:
+  extends: .plantwin
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - ./plantwin check --base "$PLANTWIN_BASE" --head HEAD --format md --out plantwin-report.md
+  after_script:
+    - cat plantwin-report.md || true
+  artifacts:
+    when: always
+    paths:
+      - plantwin-report.md
+    expire_in: 14 days

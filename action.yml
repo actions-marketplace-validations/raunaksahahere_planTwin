@@ -1,0 +1,66 @@
+name: PlanTwin check
+description: Compare PostgreSQL query plans between a base and a head revision, using a signed production stats bundle.
+author: PlanTwin contributors
+
+inputs:
+  version:
+    description: PlanTwin release to install (a tag such as v0.1.0). The checksum is verified before use.
+    required: false
+    default: v0.1.0
+  base:
+    description: Base git ref. Pass the pull request's base branch, for example origin/main.
+    required: true
+  head:
+    description: Head git ref. Use HEAD for the checked-out pull request.
+    required: false
+    default: HEAD
+  config:
+    description: Path to plantwin.yaml in the repository.
+    required: false
+    default: plantwin.yaml
+  format:
+    description: Report format written to the report file (md, json or sarif).
+    required: false
+    default: md
+  report:
+    description: File the report is written to.
+    required: false
+    default: plantwin-report.md
+
+outputs:
+  report:
+    description: Path to the report file.
+    value: ${{ inputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install PlanTwin (checksum verified)
+      shell: bash
+      env:
+        PT_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        base_url="https://github.com/${GITHUB_ACTION_REPOSITORY:-raunaksahahere/plantwin}/releases/download/${PT_VERSION}"
+        curl -fsSL -o plantwin.tar.gz "${base_url}/plantwin_linux_amd64.tar.gz"
+        curl -fsSL -o checksums.txt "${base_url}/checksums.txt"
+        grep " plantwin_linux_amd64.tar.gz$" checksums.txt | sha256sum -c -
+        tar -xzf plantwin.tar.gz plantwin
+        ./plantwin version
+
+    - name: Run the check
+      shell: bash
+      env:
+        PT_BASE: ${{ inputs.base }}
+        PT_HEAD: ${{ inputs.head }}
+        PT_CONFIG: ${{ inputs.config }}
+        PT_FORMAT: ${{ inputs.format }}
+        PT_REPORT: ${{ inputs.report }}
+      run: |
+        set +e
+        ./plantwin check --config "$PT_CONFIG" --base "$PT_BASE" --head "$PT_HEAD" --format "$PT_FORMAT" --out "$PT_REPORT"
+        status=$?
+        if [ -f "$PT_REPORT" ] && [ "$PT_FORMAT" = "md" ]; then
+          cat "$PT_REPORT" >> "$GITHUB_STEP_SUMMARY"
+        fi
+        exit $status

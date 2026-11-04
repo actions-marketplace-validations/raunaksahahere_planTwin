@@ -292,10 +292,11 @@ func cmdDemo(ctx context.Context, args []string) error {
 	fs := newFlags("demo")
 	keep := fs.Bool("keep", false, "keep the demo files and containers for inspection")
 	format := fs.String("format", "md", "output format: md, json or sarif")
+	redaction := fs.String("redaction", "", "override redaction.default for this run: keep, hash, drop-mcv or drop-histogram")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	dir, err := demo.Prepare()
+	dir, err := demo.Prepare(*redaction)
 	if err != nil {
 		return err
 	}

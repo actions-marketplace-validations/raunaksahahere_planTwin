@@ -14,7 +14,7 @@ import (
 
 func TestDemoFlagsDroppedIndex(t *testing.T) {
 	ctx := context.Background()
-	dir, err := Prepare()
+	dir, err := Prepare("")
 	if err != nil {
 		t.Fatal(err)
 	}

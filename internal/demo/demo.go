@@ -26,13 +26,31 @@ import (
 var assets embed.FS
 
 // Prepare creates the demo repository in a new temporary directory and returns its path.
-func Prepare() (string, error) {
+// A non-empty redaction overrides redaction.default in the demo config (used by the redaction benchmark).
+func Prepare(redaction string) (string, error) {
 	dir, err := os.MkdirTemp("", "plantwin-demo-")
 	if err != nil {
 		return "", err
 	}
 	if err := copyAssets(dir); err != nil {
 		return dir, err
+	}
+	if redaction != "" {
+		switch redaction {
+		case "keep", "hash", "drop-mcv", "drop-histogram":
+		default:
+			return dir, errs.New(fmt.Sprintf("Unknown redaction mode %q.", redaction),
+				"Use keep, hash, drop-mcv or drop-histogram.", "redaction")
+		}
+		cfgPath := filepath.Join(dir, "plantwin.yaml")
+		data, err := os.ReadFile(cfgPath)
+		if err != nil {
+			return dir, err
+		}
+		updated := strings.Replace(string(data), "  default: hash", "  default: "+redaction, 1)
+		if err := os.WriteFile(cfgPath, []byte(updated), 0o644); err != nil {
+			return dir, err
+		}
 	}
 	git := func(args ...string) error {
 		cmd := exec.Command("git", append([]string{"-C", dir, "-c", "user.name=plantwin-demo", "-c", "user.email=demo@plantwin.invalid",

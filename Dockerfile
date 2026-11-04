@@ -2,8 +2,11 @@
 # The extension is NOT preloaded. It loads only in CI sessions that set plantwin.ci_marker.
 # Build locally with:  docker build -t plantwin-postgres:18 .
 # Test target (runs pg_regress):  docker build --target test -t plantwin-postgres:18-test .
+# PG_IMAGE selects the base image, for example a minor version in CI: --build-arg PG_IMAGE=postgres:18.6
 
-FROM postgres:18 AS build
+ARG PG_IMAGE=postgres:18
+
+FROM ${PG_IMAGE} AS build
 RUN apt-get update \
  && apt-get install -y --no-install-recommends build-essential postgresql-server-dev-18 \
  && rm -rf /var/lib/apt/lists/*
@@ -16,7 +19,7 @@ RUN chown -R postgres:postgres /src/plantwin
 USER postgres
 RUN ./run_regress.sh
 
-FROM postgres:18 AS final
+FROM ${PG_IMAGE} AS final
 LABEL org.opencontainers.image.title="plantwin-postgres" \
       org.opencontainers.image.description="PostgreSQL 18 with the plantwin CI-only planner extension (not preloaded)" \
       org.opencontainers.image.licenses="PostgreSQL AND Apache-2.0"

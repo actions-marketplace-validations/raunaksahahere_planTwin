@@ -40,12 +40,13 @@ type Query struct {
 
 // Thresholds mirrors rules.Config. Zero values mean "use the default".
 type Thresholds struct {
-	LargeRows    float64 `yaml:"large_rows"`
-	SeqScanRows  float64 `yaml:"seq_scan_rows"`
-	JoinRows     float64 `yaml:"join_rows"`
-	WorkMemBytes float64 `yaml:"work_mem_bytes"`
-	CostRatio    float64 `yaml:"cost_ratio"`
-	MinCost      float64 `yaml:"min_cost"`
+	LargeRows        float64 `yaml:"large_rows"`
+	SeqScanRows      float64 `yaml:"seq_scan_rows"`
+	JoinRows         float64 `yaml:"join_rows"`
+	WorkMemBytes     float64 `yaml:"work_mem_bytes"`
+	CostRatio        float64 `yaml:"cost_ratio"`
+	MinCost          float64 `yaml:"min_cost"`
+	IndexSelectivity float64 `yaml:"index_selectivity"`
 }
 
 // Redaction says how statistics values are exported. See docs/privacy-and-redaction.md.
@@ -122,6 +123,10 @@ func Validate(cfg *Config) error {
 				"Use keep, hash, drop-mcv or drop-histogram.", "redaction.columns.%s", col)
 		}
 	}
+	if s := cfg.Thresholds.IndexSelectivity; s != 0 && (s <= 0 || s > 1) {
+		return errs.New(fmt.Sprintf("thresholds.index_selectivity must be between 0 and 1, got %g.", s),
+			"Use a fraction such as 0.10 (10% of the table).", "thresholds.index_selectivity")
+	}
 	seen := map[string]bool{}
 	for i, q := range cfg.Queries {
 		if q.Name == "" {
@@ -158,6 +163,14 @@ func (c Config) Rules() rules.Config {
 	}
 	if c.Thresholds.MinCost > 0 {
 		r.MinCost = c.Thresholds.MinCost
+	}
+	if c.Thresholds.IndexSelectivity > 0 {
+		if c.Thresholds.IndexSelectivity > 1 {
+			// Validated in Validate; kept defensive here.
+			r.IndexSelectivity = 1
+		} else {
+			r.IndexSelectivity = c.Thresholds.IndexSelectivity
+		}
 	}
 	r.FailOn = rules.Severity(c.FailOn)
 	return r
