@@ -7,3 +7,4 @@
 *.bc
 /ext/plantwin/*.so
 .DS_Store
+bin/
