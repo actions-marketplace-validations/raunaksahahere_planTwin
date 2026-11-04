@@ -1,0 +1,9 @@
+# Local artifacts
+/bench/data/
+/bench/results/*.tmp
+*.tbl
+*.o
+*.so
+*.bc
+/ext/plantwin/*.so
+.DS_Store
