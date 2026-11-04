@@ -1,0 +1,4 @@
+comment = 'CI-only planner size overrides from imported statistics (PlanTwin)'
+default_version = '0.1'
+relocatable = true
+module_pathname = '$libdir/plantwin'

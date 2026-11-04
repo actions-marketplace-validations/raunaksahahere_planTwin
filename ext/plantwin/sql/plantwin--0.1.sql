@@ -1,0 +1,2 @@
+-- plantwin 0.1: no SQL objects. The extension works through LOAD and GUCs.
+-- Loading is refused unless plantwin.ci_marker is set (see plantwin.c).

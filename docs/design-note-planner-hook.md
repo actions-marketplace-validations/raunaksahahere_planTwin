@@ -1,6 +1,6 @@
 # Design note: the `plantwin` planner hook (DRAFT, for review, no code yet)
 
-Status: proposal. Implementation waits for review. Step 0 is partial: the gap is shown on TPC-H, but the hook's effect is not yet shown.
+Status: **approved** (owner instruction, autonomous completion). Open questions resolved below. Implemented in `ext/plantwin/plantwin.c`.
 
 ## Problem
 An empty CI database with imported statistics gets 0-row estimates, because the planner
@@ -25,17 +25,23 @@ The hook runs after the planner's own estimate (`plancat.c:204-205`) and index s
   for the current backend.
 - Loads only in CI sessions (explicit `LOAD`, not `shared_preload_libraries`).
 
-## Open questions for review
-1. Is `shared_preload_libraries` ever needed, or is per-session `LOAD` enough? (Proposed: per-session.)
-2. Inheritance and partitions: the hook receives child relations too. Does each child need
-   its own imported stats? (To verify against `plancat.c` before deciding.)
-3. Which fields beyond `pages`/`tuples`/`allvisfrac` affect the plans in the 22 TPC-H queries?
-   Decide after the spike.
-4. Extended statistics are not preserved by PG18 export. Status: the PG18 release notes state
-   "Extended statistics are not preserved" under the pg_upgrade item
-   (https://www.postgresql.org/docs/18/release-18.html, section E.6.3.7.2). A test on TPC-H
-   confirmed that `pg_dump --statistics-only` also carries no extended-statistics restore
-   calls. See `docs/why-a-hook.md`.
+## Resolved questions (decisions, see ADRs)
+1. **Loading.** Per-session `LOAD` only, never `shared_preload_libraries`. The guard also
+   makes a `shared_preload_libraries` entry fail server startup (verified: `pg_ctl start`
+   exits with "plantwin refuses to load outside CI"). ADR-0001.
+2. **Inheritance and partitions.** The hook runs once per relation, so each partition is
+   sized from its own `pg_class` row. Partitioned parents have no storage (`relpages = 0`) and
+   are skipped. The CLI must export stats for every partition, which `pg_dump` already does.
+   Not yet covered by a test; listed as a limitation until one exists.
+3. **Fields beyond pages/tuples/allvisfrac.** Index `tuples` (mirroring `plancat.c`) and B-tree
+   `tree_height` are also overridden, because the spike showed `tree_height` (physical
+   metapage) changes index-scan cost. Height uses the model in ADR-0002. Other fields are
+   overridden only when the evidence requires it.
+4. **Extended statistics.** Not restored. The CLI lists `CREATE STATISTICS` objects at export and
+   warns that multi-column estimates will differ. It does not re-create them (that would
+   require ANALYZE on synthetic data, which the twin must never run). ADR-0004. The PG18
+   release note wording (pg_upgrade item) is cited in `docs/why-a-hook.md`, and the dump-path
+   behaviour was checked on TPC-H.
 
 ## Explicit non-goals
 - No edits to relation files (rejected in the blueprint: unsafe, version-brittle).

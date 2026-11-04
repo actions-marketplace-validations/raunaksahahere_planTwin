@@ -1,0 +1,14 @@
+-- Loading must fail without a CI marker.
+LOAD 'plantwin';
+ERROR:  plantwin refuses to load outside CI
+DETAIL:  plantwin.ci_marker is not set.
+HINT:  This extension changes planner estimates and must never run in production. Set plantwin.ci_marker in a CI session before LOAD.
+-- With a marker, loading succeeds.
+SET plantwin.ci_marker = 'ci:regress';
+LOAD 'plantwin';
+SHOW plantwin.enabled;
+ plantwin.enabled 
+------------------
+ off
+(1 row)
+

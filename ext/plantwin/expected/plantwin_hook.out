@@ -1,0 +1,46 @@
+-- The table is physically empty; imported stats say 1e6 rows over 4480 pages.
+SET plantwin.ci_marker = 'ci:regress';
+LOAD 'plantwin';
+CREATE TABLE plantwin_t (id int, v int);
+CREATE INDEX plantwin_t_v ON plantwin_t (v);
+SELECT * FROM pg_catalog.pg_restore_relation_stats(
+    'version', '180006'::integer, 'schemaname', 'public', 'relname', 'plantwin_t',
+    'relpages', '4480'::integer, 'reltuples', '1e+06'::real,
+    'relallvisible', '0'::integer, 'relallfrozen', '0'::integer);
+ pg_restore_relation_stats 
+---------------------------
+ t
+(1 row)
+
+SELECT * FROM pg_catalog.pg_restore_relation_stats(
+    'version', '180006'::integer, 'schemaname', 'public', 'relname', 'plantwin_t_v',
+    'relpages', '2700'::integer, 'reltuples', '1e+06'::real,
+    'relallvisible', '0'::integer, 'relallfrozen', '0'::integer);
+ pg_restore_relation_stats 
+---------------------------
+ t
+(1 row)
+
+-- Hook off (default): the planner sees the empty heap.
+SET plantwin.enabled = off;
+EXPLAIN SELECT * FROM plantwin_t WHERE v = 7;
+                        QUERY PLAN                        
+----------------------------------------------------------
+ Seq Scan on plantwin_t  (cost=0.00..0.00 rows=1 width=8)
+   Filter: (v = 7)
+(2 rows)
+
+-- Hook on: the planner uses the imported sizes.
+SET plantwin.enabled = on;
+EXPLAIN SELECT * FROM plantwin_t WHERE v = 7;
+                                  QUERY PLAN                                   
+-------------------------------------------------------------------------------
+ Bitmap Heap Scan on plantwin_t  (cost=95.17..4846.13 rows=5000 width=8)
+   Recheck Cond: (v = 7)
+   ->  Bitmap Index Scan on plantwin_t_v  (cost=0.00..93.92 rows=5000 width=0)
+         Index Cond: (v = 7)
+(4 rows)
+
+-- Clean up.
+SET plantwin.enabled = off;
+DROP TABLE plantwin_t;
