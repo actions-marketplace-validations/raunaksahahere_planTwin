@@ -1,12 +1,12 @@
 # Design note: the `plantwin` planner hook (DRAFT, for review, no code yet)
 
-Status: proposal. Implementation waits for review. Step 0 (TPC-H spike) is not yet complete.
+Status: proposal. Implementation waits for review. Step 0 is partial: the gap is shown on TPC-H, but the hook's effect is not yet shown.
 
 ## Problem
 An empty CI database with imported statistics gets 0-row estimates, because the planner
 sizes a table from its physical block count (`table_block_relation_estimate_size()`,
 `src/backend/access/table/tableam.c:703-709`: 0 blocks means "clearly empty", so 0 tuples).
-Reproduced on PG 18.6 with a 1M-row table: `bench/spike/synthetic_repro.sh`.
+Reproduced on PG 18.6 with a 1M-row table (`bench/spike/synthetic_repro.sh`) and on TPC-H SF1 with 0/22 plan shapes matching (`docs/why-a-hook.md`).
 
 ## Proposed mechanism
 Install a `get_relation_info_hook` (declared in `plancat.c`, called at `plancat.c:574`).
@@ -31,8 +31,11 @@ The hook runs after the planner's own estimate (`plancat.c:204-205`) and index s
    its own imported stats? (To verify against `plancat.c` before deciding.)
 3. Which fields beyond `pages`/`tuples`/`allvisfrac` affect the plans in the 22 TPC-H queries?
    Decide after the spike.
-4. Extended statistics are not preserved by PG18 export. Verify this claim against the
-   release notes before relying on it.
+4. Extended statistics are not preserved by PG18 export. Status: the PG18 release notes state
+   "Extended statistics are not preserved" under the pg_upgrade item
+   (https://www.postgresql.org/docs/18/release-18.html, section E.6.3.7.2). A test on TPC-H
+   confirmed that `pg_dump --statistics-only` also carries no extended-statistics restore
+   calls. See `docs/why-a-hook.md`.
 
 ## Explicit non-goals
 - No edits to relation files (rejected in the blueprint: unsafe, version-brittle).

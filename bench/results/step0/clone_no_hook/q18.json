@@ -1,0 +1,169 @@
+{
+ "Node Type": "Limit",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 0.09,
+ "Total Cost": 0.09,
+ "Plan Rows": 1,
+ "Plan Width": 75,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Sort",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 0.09,
+   "Total Cost": 0.09,
+   "Plan Rows": 1,
+   "Plan Width": 75,
+   "Disabled": false,
+   "Sort Key": [
+    "orders.o_totalprice DESC",
+    "orders.o_orderdate"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Aggregate",
+     "Strategy": "Hashed",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 0.07,
+     "Total Cost": 0.08,
+     "Plan Rows": 1,
+     "Plan Width": 75,
+     "Disabled": false,
+     "Group Key": [
+      "customer.c_custkey",
+      "orders.o_orderkey"
+     ],
+     "Planned Partitions": 0,
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Startup Cost": 0.01,
+       "Total Cost": 0.06,
+       "Plan Rows": 1,
+       "Plan Width": 48,
+       "Disabled": false,
+       "Inner Unique": true,
+       "Join Filter": "(orders.o_orderkey = lineitem_1.l_orderkey)",
+       "Plans": [
+        {
+         "Node Type": "Nested Loop",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.03,
+         "Plan Rows": 1,
+         "Plan Width": 56,
+         "Disabled": false,
+         "Inner Unique": false,
+         "Join Filter": "(orders.o_orderkey = lineitem.l_orderkey)",
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Startup Cost": 0.0,
+           "Total Cost": 0.01,
+           "Plan Rows": 1,
+           "Plan Width": 43,
+           "Disabled": false,
+           "Inner Unique": false,
+           "Join Filter": "(customer.c_custkey = orders.o_custkey)",
+           "Plans": [
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "customer",
+             "Alias": "customer",
+             "Startup Cost": 0.0,
+             "Total Cost": 0.0,
+             "Plan Rows": 1,
+             "Plan Width": 23,
+             "Disabled": false
+            },
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "orders",
+             "Alias": "orders",
+             "Startup Cost": 0.0,
+             "Total Cost": 0.0,
+             "Plan Rows": 1,
+             "Plan Width": 24,
+             "Disabled": false
+            }
+           ]
+          },
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "lineitem",
+           "Alias": "lineitem",
+           "Startup Cost": 0.0,
+           "Total Cost": 0.0,
+           "Plan Rows": 1,
+           "Plan Width": 13,
+           "Disabled": false
+          }
+         ]
+        },
+        {
+         "Node Type": "Aggregate",
+         "Strategy": "Hashed",
+         "Partial Mode": "Simple",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Startup Cost": 0.01,
+         "Total Cost": 0.02,
+         "Plan Rows": 1,
+         "Plan Width": 8,
+         "Disabled": false,
+         "Group Key": [
+          "lineitem_1.l_orderkey"
+         ],
+         "Filter": "(sum(lineitem_1.l_quantity) > '300'::numeric)",
+         "Planned Partitions": 0,
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "lineitem",
+           "Alias": "lineitem_1",
+           "Startup Cost": 0.0,
+           "Total Cost": 0.0,
+           "Plan Rows": 1,
+           "Plan Width": 13,
+           "Disabled": false
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
