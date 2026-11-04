@@ -30,8 +30,9 @@ before trusting a clean report.
   concurrency, or the effect of `work_mem` on real spills. Cost is reported as info, not as proof.
 - **Commit-time locks and migration duration.** A migration that takes an `ACCESS EXCLUSIVE` lock for minutes is out of
   scope. Migration linters (Squawk, Atlas) cover that.
-- **Non-B-tree indexes.** The size and height estimates are for B-trees. GiST, GIN, BRIN and hash indexes are sized
-  from the table's tuple count and default fill, which is rough.
+- **Non-B-tree indexes.** Existing GiST, GIN, BRIN and hash indexes get their imported sizes, but no height estimate.
+  New indexes of these types are not sized at all, so the planner sees them as empty. Treat findings that involve them
+  as unreliable.
 
 ## Estimates the twin makes itself
 
