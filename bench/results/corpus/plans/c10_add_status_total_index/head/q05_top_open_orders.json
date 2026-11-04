@@ -1,0 +1,28 @@
+{
+ "Node Type": "Limit",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 0.17,
+ "Total Cost": 23.11,
+ "Plan Rows": 50,
+ "Plan Width": 14,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Index Scan",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Scan Direction": "Backward",
+   "Index Name": "orders_status_total",
+   "Relation Name": "orders",
+   "Alias": "orders",
+   "Startup Cost": 0.17,
+   "Total Cost": 21976.57,
+   "Plan Rows": 47900,
+   "Plan Width": 14,
+   "Disabled": false,
+   "Index Cond": "(status = 'open'::text)"
+  }
+ ]
+}

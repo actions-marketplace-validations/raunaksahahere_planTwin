@@ -1,0 +1,93 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Sorted",
+ "Partial Mode": "Simple",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 6499.57,
+ "Total Cost": 6514.72,
+ "Plan Rows": 866,
+ "Plan Width": 16,
+ "Disabled": false,
+ "Group Key": [
+  "i.sku"
+ ],
+ "Plans": [
+  {
+   "Node Type": "Sort",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 6499.57,
+   "Total Cost": 6501.73,
+   "Plan Rows": 866,
+   "Plan Width": 12,
+   "Disabled": false,
+   "Sort Key": [
+    "i.sku"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Nested Loop",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Join Type": "Inner",
+     "Startup Cost": 7.96,
+     "Total Cost": 6457.32,
+     "Plan Rows": 866,
+     "Plan Width": 12,
+     "Disabled": false,
+     "Inner Unique": false,
+     "Plans": [
+      {
+       "Node Type": "Bitmap Heap Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "orders",
+       "Alias": "o",
+       "Startup Cost": 7.53,
+       "Total Cost": 1419.05,
+       "Plan Rows": 433,
+       "Plan Width": 8,
+       "Disabled": false,
+       "Recheck Cond": "(customer_id = 77)",
+       "Plans": [
+        {
+         "Node Type": "Bitmap Index Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Index Name": "orders_customer_created",
+         "Startup Cost": 0.0,
+         "Total Cost": 7.42,
+         "Plan Rows": 433,
+         "Plan Width": 0,
+         "Disabled": false,
+         "Index Cond": "(customer_id = 77)"
+        }
+       ]
+      },
+      {
+       "Node Type": "Index Scan",
+       "Parent Relationship": "Inner",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Scan Direction": "Forward",
+       "Index Name": "order_items_pkey",
+       "Relation Name": "order_items",
+       "Alias": "i",
+       "Startup Cost": 0.43,
+       "Total Cost": 11.62,
+       "Plan Rows": 2,
+       "Plan Width": 20,
+       "Disabled": false,
+       "Index Cond": "(order_id = o.id)"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

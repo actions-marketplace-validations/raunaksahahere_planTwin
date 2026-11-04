@@ -1,0 +1,62 @@
+[
+  {
+    "query": "q01_customer_lookup",
+    "findings": [
+      {
+        "rule": "shape_changed",
+        "severity": "info",
+        "query": "q01_customer_lookup",
+        "message": "Plan shape changed: replaced at root/0: Bitmap Index Scan -\u003e Bitmap Index Scan",
+        "why": "The plan now does its work in a different order or with different operators.",
+        "fix": "Compare the two plans below and decide whether the change is expected.",
+        "estimated": false,
+        "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)",
+        "new_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_created)"
+      }
+    ]
+  },
+  {
+    "query": "q02_open_recent_count",
+    "findings": []
+  },
+  {
+    "query": "q03_eu_orders_join",
+    "findings": []
+  },
+  {
+    "query": "q04_items_by_customer",
+    "findings": [
+      {
+        "rule": "shape_changed",
+        "severity": "info",
+        "query": "q04_items_by_customer",
+        "message": "Plan shape changed: replaced at root/0/0/0/0: Bitmap Index Scan -\u003e Bitmap Index Scan",
+        "why": "The plan now does its work in a different order or with different operators.",
+        "fix": "Compare the two plans below and decide whether the change is expected.",
+        "estimated": false,
+        "old_plan": "Aggregate (Sorted)(Sort(Nested Loop(Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx), Index Scan order_items_pkey on order_items)))",
+        "new_plan": "Aggregate (Sorted)(Sort(Nested Loop(Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_created), Index Scan order_items_pkey on order_items)))"
+      }
+    ]
+  },
+  {
+    "query": "q05_top_open_orders",
+    "findings": []
+  },
+  {
+    "query": "q06_customer_recent",
+    "findings": [
+      {
+        "rule": "shape_changed",
+        "severity": "info",
+        "query": "q06_customer_recent",
+        "message": "Plan shape changed: replaced at root/0: Bitmap Index Scan -\u003e Bitmap Index Scan",
+        "why": "The plan now does its work in a different order or with different operators.",
+        "fix": "Compare the two plans below and decide whether the change is expected.",
+        "estimated": false,
+        "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)",
+        "new_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_created)"
+      }
+    ]
+  }
+]

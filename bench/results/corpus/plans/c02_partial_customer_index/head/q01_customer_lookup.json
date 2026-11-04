@@ -1,0 +1,28 @@
+{
+ "Node Type": "Gather",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 1000.0,
+ "Total Cost": 14544.43,
+ "Plan Rows": 21,
+ "Plan Width": 21,
+ "Disabled": false,
+ "Workers Planned": 2,
+ "Single Copy": false,
+ "Plans": [
+  {
+   "Node Type": "Seq Scan",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": true,
+   "Async Capable": false,
+   "Relation Name": "orders",
+   "Alias": "orders",
+   "Startup Cost": 0.0,
+   "Total Cost": 13542.33,
+   "Plan Rows": 9,
+   "Plan Width": 21,
+   "Disabled": false,
+   "Filter": "(customer_id = 4242)"
+  }
+ ]
+}

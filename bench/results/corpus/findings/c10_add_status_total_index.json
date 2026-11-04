@@ -1,0 +1,51 @@
+[
+  {
+    "query": "q01_customer_lookup",
+    "findings": []
+  },
+  {
+    "query": "q02_open_recent_count",
+    "findings": [
+      {
+        "rule": "shape_changed",
+        "severity": "info",
+        "query": "q02_open_recent_count",
+        "message": "Plan shape changed: replaced at root/0/0: Bitmap Index Scan -\u003e Bitmap Index Scan",
+        "why": "The plan now does its work in a different order or with different operators.",
+        "fix": "Compare the two plans below and decide whether the change is expected.",
+        "estimated": false,
+        "old_plan": "Aggregate (Plain)(Bitmap Heap Scan on orders(Bitmap Index Scan orders_status_idx))",
+        "new_plan": "Aggregate (Plain)(Bitmap Heap Scan on orders(Bitmap Index Scan orders_status_total))"
+      }
+    ]
+  },
+  {
+    "query": "q03_eu_orders_join",
+    "findings": []
+  },
+  {
+    "query": "q04_items_by_customer",
+    "findings": []
+  },
+  {
+    "query": "q05_top_open_orders",
+    "findings": [
+      {
+        "rule": "shape_changed",
+        "severity": "info",
+        "query": "q05_top_open_orders",
+        "relation": "orders",
+        "message": "Plan shape changed: replaced at root/0: Gather Merge -\u003e Index Scan on orders",
+        "why": "The plan now does its work in a different order or with different operators.",
+        "fix": "Compare the two plans below and decide whether the change is expected.",
+        "estimated": true,
+        "old_plan": "Limit(Gather Merge(Sort(Bitmap Heap Scan on orders(Bitmap Index Scan orders_status_idx))))",
+        "new_plan": "Limit(Index Scan orders_status_total on orders)"
+      }
+    ]
+  },
+  {
+    "query": "q06_customer_recent",
+    "findings": []
+  }
+]

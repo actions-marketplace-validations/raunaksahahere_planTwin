@@ -1,0 +1,70 @@
+{
+ "Node Type": "Limit",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 10262.6,
+ "Total Cost": 10268.42,
+ "Plan Rows": 50,
+ "Plan Width": 14,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Gather Merge",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 10262.6,
+   "Total Cost": 15841.23,
+   "Plan Rows": 47899,
+   "Plan Width": 14,
+   "Disabled": false,
+   "Workers Planned": 2,
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 9262.57,
+     "Total Cost": 9312.47,
+     "Plan Rows": 19958,
+     "Plan Width": 14,
+     "Disabled": false,
+     "Sort Key": [
+      "total DESC"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Bitmap Heap Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": true,
+       "Async Capable": false,
+       "Relation Name": "orders",
+       "Alias": "orders",
+       "Startup Cost": 16.11,
+       "Total Cost": 8599.58,
+       "Plan Rows": 19958,
+       "Plan Width": 14,
+       "Disabled": false,
+       "Recheck Cond": "(status = 'open'::text)",
+       "Plans": [
+        {
+         "Node Type": "Bitmap Index Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Index Name": "orders_customer_open",
+         "Startup Cost": 0.0,
+         "Total Cost": 4.13,
+         "Plan Rows": 47900,
+         "Plan Width": 0,
+         "Disabled": false
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

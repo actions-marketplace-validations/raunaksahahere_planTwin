@@ -1,0 +1,56 @@
+{
+ "Node Type": "Limit",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 15205.35,
+ "Total Cost": 15211.17,
+ "Plan Rows": 50,
+ "Plan Width": 14,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Gather Merge",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 15205.35,
+   "Total Cost": 20783.98,
+   "Plan Rows": 47899,
+   "Plan Width": 14,
+   "Disabled": false,
+   "Workers Planned": 2,
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 14205.32,
+     "Total Cost": 14255.22,
+     "Plan Rows": 19958,
+     "Plan Width": 14,
+     "Disabled": false,
+     "Sort Key": [
+      "total DESC"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Seq Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": true,
+       "Async Capable": false,
+       "Relation Name": "orders",
+       "Alias": "orders",
+       "Startup Cost": 0.0,
+       "Total Cost": 13542.33,
+       "Plan Rows": 19958,
+       "Plan Width": 14,
+       "Disabled": false,
+       "Filter": "(status = 'open'::text)"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

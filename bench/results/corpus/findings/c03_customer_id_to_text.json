@@ -1,0 +1,74 @@
+[
+  {
+    "query": "q01_customer_lookup",
+    "head_error": "operator does not exist: text = integer",
+    "findings": [
+      {
+        "rule": "query_error",
+        "severity": "error",
+        "query": "q01_customer_lookup",
+        "message": "The query no longer plans on the head revision: operator does not exist: text = integer",
+        "why": "The application would fail at runtime with this query.",
+        "fix": "Fix the migration or update the query to match the new column type.",
+        "estimated": false,
+        "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)"
+      }
+    ]
+  },
+  {
+    "query": "q02_open_recent_count",
+    "findings": []
+  },
+  {
+    "query": "q03_eu_orders_join",
+    "head_error": "operator does not exist: integer = text",
+    "findings": [
+      {
+        "rule": "query_error",
+        "severity": "error",
+        "query": "q03_eu_orders_join",
+        "message": "The query no longer plans on the head revision: operator does not exist: integer = text",
+        "why": "The application would fail at runtime with this query.",
+        "fix": "Fix the migration or update the query to match the new column type.",
+        "estimated": false,
+        "old_plan": "Hash Join(Bitmap Heap Scan on orders(Bitmap Index Scan orders_created_idx), Bitmap Heap Scan on customers(Bitmap Index Scan customers_region_idx))"
+      }
+    ]
+  },
+  {
+    "query": "q04_items_by_customer",
+    "head_error": "operator does not exist: text = integer",
+    "findings": [
+      {
+        "rule": "query_error",
+        "severity": "error",
+        "query": "q04_items_by_customer",
+        "message": "The query no longer plans on the head revision: operator does not exist: text = integer",
+        "why": "The application would fail at runtime with this query.",
+        "fix": "Fix the migration or update the query to match the new column type.",
+        "estimated": false,
+        "old_plan": "Aggregate (Sorted)(Sort(Nested Loop(Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx), Index Scan order_items_pkey on order_items)))"
+      }
+    ]
+  },
+  {
+    "query": "q05_top_open_orders",
+    "findings": []
+  },
+  {
+    "query": "q06_customer_recent",
+    "head_error": "operator does not exist: text = integer",
+    "findings": [
+      {
+        "rule": "query_error",
+        "severity": "error",
+        "query": "q06_customer_recent",
+        "message": "The query no longer plans on the head revision: operator does not exist: text = integer",
+        "why": "The application would fail at runtime with this query.",
+        "fix": "Fix the migration or update the query to match the new column type.",
+        "estimated": false,
+        "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)"
+      }
+    ]
+  }
+]

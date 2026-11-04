@@ -1,0 +1,92 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Sorted",
+ "Partial Mode": "Simple",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 16652.12,
+ "Total Cost": 16765.97,
+ "Plan Rows": 866,
+ "Plan Width": 16,
+ "Disabled": false,
+ "Group Key": [
+  "i.sku"
+ ],
+ "Plans": [
+  {
+   "Node Type": "Gather Merge",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 16652.12,
+   "Total Cost": 16752.98,
+   "Plan Rows": 866,
+   "Plan Width": 12,
+   "Disabled": false,
+   "Workers Planned": 2,
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 15652.1,
+     "Total Cost": 15653.0,
+     "Plan Rows": 361,
+     "Plan Width": 12,
+     "Disabled": false,
+     "Sort Key": [
+      "i.sku"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Startup Cost": 0.43,
+       "Total Cost": 15636.76,
+       "Plan Rows": 361,
+       "Plan Width": 12,
+       "Disabled": false,
+       "Inner Unique": false,
+       "Plans": [
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": true,
+         "Async Capable": false,
+         "Relation Name": "orders",
+         "Alias": "o",
+         "Startup Cost": 0.0,
+         "Total Cost": 13542.33,
+         "Plan Rows": 180,
+         "Plan Width": 8,
+         "Disabled": false,
+         "Filter": "(customer_id = 77)"
+        },
+        {
+         "Node Type": "Index Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "order_items_pkey",
+         "Relation Name": "order_items",
+         "Alias": "i",
+         "Startup Cost": 0.43,
+         "Total Cost": 11.62,
+         "Plan Rows": 2,
+         "Plan Width": 20,
+         "Disabled": false,
+         "Index Cond": "(order_id = o.id)"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

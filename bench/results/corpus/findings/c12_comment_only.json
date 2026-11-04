@@ -1,0 +1,26 @@
+[
+  {
+    "query": "q01_customer_lookup",
+    "findings": []
+  },
+  {
+    "query": "q02_open_recent_count",
+    "findings": []
+  },
+  {
+    "query": "q03_eu_orders_join",
+    "findings": []
+  },
+  {
+    "query": "q04_items_by_customer",
+    "findings": []
+  },
+  {
+    "query": "q05_top_open_orders",
+    "findings": []
+  },
+  {
+    "query": "q06_customer_recent",
+    "findings": []
+  }
+]

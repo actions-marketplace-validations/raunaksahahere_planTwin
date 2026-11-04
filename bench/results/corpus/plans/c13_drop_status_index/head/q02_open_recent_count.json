@@ -1,0 +1,74 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Plain",
+ "Partial Mode": "Finalize",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 14660.23,
+ "Total Cost": 14660.24,
+ "Plan Rows": 1,
+ "Plan Width": 8,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Gather",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 14660.01,
+   "Total Cost": 14660.22,
+   "Plan Rows": 2,
+   "Plan Width": 8,
+   "Disabled": false,
+   "Workers Planned": 2,
+   "Single Copy": false,
+   "Plans": [
+    {
+     "Node Type": "Aggregate",
+     "Strategy": "Plain",
+     "Partial Mode": "Partial",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 13660.01,
+     "Total Cost": 13660.02,
+     "Plan Rows": 1,
+     "Plan Width": 8,
+     "Disabled": false,
+     "Plans": [
+      {
+       "Node Type": "Bitmap Heap Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": true,
+       "Async Capable": false,
+       "Relation Name": "orders",
+       "Alias": "orders",
+       "Startup Cost": 4166.74,
+       "Total Cost": 13650.83,
+       "Plan Rows": 3672,
+       "Plan Width": 0,
+       "Disabled": false,
+       "Recheck Cond": "(created_at >= '2026-01-01 00:00:00'::timestamp without time zone)",
+       "Filter": "(status = 'open'::text)",
+       "Plans": [
+        {
+         "Node Type": "Bitmap Index Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Index Name": "orders_created_idx",
+         "Startup Cost": 0.0,
+         "Total Cost": 4164.54,
+         "Plan Rows": 184015,
+         "Plan Width": 0,
+         "Disabled": false,
+         "Index Cond": "(created_at >= '2026-01-01 00:00:00'::timestamp without time zone)"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

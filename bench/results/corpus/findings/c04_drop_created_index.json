@@ -1,0 +1,39 @@
+[
+  {
+    "query": "q01_customer_lookup",
+    "findings": []
+  },
+  {
+    "query": "q02_open_recent_count",
+    "findings": []
+  },
+  {
+    "query": "q03_eu_orders_join",
+    "findings": [
+      {
+        "rule": "lost_index",
+        "severity": "error",
+        "query": "q03_eu_orders_join",
+        "relation": "orders",
+        "message": "Index use lost on orders: a selective index is now unused, and the table is read by a sequential scan (about 1.0M rows).",
+        "why": "Queries on this table used a selective index. Without it, PostgreSQL reads every row of the table.",
+        "fix": "Recreate the index, or add it back in this migration. To accept the change, run `plantwin accept`.",
+        "estimated": true,
+        "old_plan": "Hash Join(Bitmap Heap Scan on orders(Bitmap Index Scan orders_created_idx), Bitmap Heap Scan on customers(Bitmap Index Scan customers_region_idx))",
+        "new_plan": "Gather(Hash Join(Seq Scan on orders, Bitmap Heap Scan on customers(Bitmap Index Scan customers_region_idx)))"
+      }
+    ]
+  },
+  {
+    "query": "q04_items_by_customer",
+    "findings": []
+  },
+  {
+    "query": "q05_top_open_orders",
+    "findings": []
+  },
+  {
+    "query": "q06_customer_recent",
+    "findings": []
+  }
+]

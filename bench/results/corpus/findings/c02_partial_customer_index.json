@@ -1,0 +1,122 @@
+[
+  {
+    "query": "q01_customer_lookup",
+    "findings": [
+      {
+        "rule": "lost_index",
+        "severity": "error",
+        "query": "q01_customer_lookup",
+        "relation": "orders",
+        "message": "Index use lost on orders: a selective index is now unused, and the table is read by a sequential scan (about 1.0M rows).",
+        "why": "Queries on this table used a selective index. Without it, PostgreSQL reads every row of the table.",
+        "fix": "Recreate the index, or add it back in this migration. To accept the change, run `plantwin accept`.",
+        "estimated": true,
+        "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)",
+        "new_plan": "Gather(Seq Scan on orders)"
+      },
+      {
+        "rule": "cost_ratio",
+        "severity": "info",
+        "query": "q01_customer_lookup",
+        "message": "Estimated total cost rose 169.7x (86 to 14544).",
+        "why": "Cost is an estimate. A large rise is a signal to look, not proof of a slowdown.",
+        "fix": "Compare the two plans below and verify on a representative workload.",
+        "estimated": false,
+        "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)",
+        "new_plan": "Gather(Seq Scan on orders)"
+      }
+    ]
+  },
+  {
+    "query": "q02_open_recent_count",
+    "findings": [
+      {
+        "rule": "shape_changed",
+        "severity": "info",
+        "query": "q02_open_recent_count",
+        "message": "Plan shape changed: replaced at root/0/0: Bitmap Index Scan -\u003e Bitmap Index Scan",
+        "why": "The plan now does its work in a different order or with different operators.",
+        "fix": "Compare the two plans below and decide whether the change is expected.",
+        "estimated": false,
+        "old_plan": "Aggregate (Plain)(Bitmap Heap Scan on orders(Bitmap Index Scan orders_status_idx))",
+        "new_plan": "Aggregate (Plain)(Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_open))"
+      }
+    ]
+  },
+  {
+    "query": "q03_eu_orders_join",
+    "findings": []
+  },
+  {
+    "query": "q04_items_by_customer",
+    "findings": [
+      {
+        "rule": "lost_index",
+        "severity": "error",
+        "query": "q04_items_by_customer",
+        "relation": "orders",
+        "message": "Index use lost on orders: a selective index is now unused, and the table is read by a sequential scan (about 1.0M rows).",
+        "why": "Queries on this table used a selective index. Without it, PostgreSQL reads every row of the table.",
+        "fix": "Recreate the index, or add it back in this migration. To accept the change, run `plantwin accept`.",
+        "estimated": true,
+        "old_plan": "Aggregate (Sorted)(Sort(Nested Loop(Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx), Index Scan order_items_pkey on order_items)))",
+        "new_plan": "Aggregate (Sorted)(Gather Merge(Sort(Nested Loop(Seq Scan on orders, Index Scan order_items_pkey on order_items))))"
+      },
+      {
+        "rule": "cost_ratio",
+        "severity": "info",
+        "query": "q04_items_by_customer",
+        "message": "Estimated total cost rose 2.6x (6515 to 16766).",
+        "why": "Cost is an estimate. A large rise is a signal to look, not proof of a slowdown.",
+        "fix": "Compare the two plans below and verify on a representative workload.",
+        "estimated": false,
+        "old_plan": "Aggregate (Sorted)(Sort(Nested Loop(Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx), Index Scan order_items_pkey on order_items)))",
+        "new_plan": "Aggregate (Sorted)(Gather Merge(Sort(Nested Loop(Seq Scan on orders, Index Scan order_items_pkey on order_items))))"
+      }
+    ]
+  },
+  {
+    "query": "q05_top_open_orders",
+    "findings": [
+      {
+        "rule": "shape_changed",
+        "severity": "info",
+        "query": "q05_top_open_orders",
+        "message": "Plan shape changed: replaced at root/0/0/0/0: Bitmap Index Scan -\u003e Bitmap Index Scan",
+        "why": "The plan now does its work in a different order or with different operators.",
+        "fix": "Compare the two plans below and decide whether the change is expected.",
+        "estimated": false,
+        "old_plan": "Limit(Gather Merge(Sort(Bitmap Heap Scan on orders(Bitmap Index Scan orders_status_idx))))",
+        "new_plan": "Limit(Gather Merge(Sort(Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_open))))"
+      }
+    ]
+  },
+  {
+    "query": "q06_customer_recent",
+    "findings": [
+      {
+        "rule": "lost_index",
+        "severity": "error",
+        "query": "q06_customer_recent",
+        "relation": "orders",
+        "message": "Index use lost on orders: a selective index is now unused, and the table is read by a sequential scan (about 1.0M rows).",
+        "why": "Queries on this table used a selective index. Without it, PostgreSQL reads every row of the table.",
+        "fix": "Recreate the index, or add it back in this migration. To accept the change, run `plantwin accept`.",
+        "estimated": true,
+        "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)",
+        "new_plan": "Gather(Seq Scan on orders)"
+      },
+      {
+        "rule": "cost_ratio",
+        "severity": "info",
+        "query": "q06_customer_recent",
+        "message": "Estimated total cost rose 3.4x (4671 to 15700).",
+        "why": "Cost is an estimate. A large rise is a signal to look, not proof of a slowdown.",
+        "fix": "Compare the two plans below and verify on a representative workload.",
+        "estimated": false,
+        "old_plan": "Bitmap Heap Scan on orders(Bitmap Index Scan orders_customer_idx)",
+        "new_plan": "Gather(Seq Scan on orders)"
+      }
+    ]
+  }
+]
