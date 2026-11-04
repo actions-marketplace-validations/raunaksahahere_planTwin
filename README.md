@@ -9,6 +9,8 @@ PlanTwin catches PostgreSQL query-plan regressions in pull requests, using produ
 
 > **Estimated:** statistics for orders were estimated, not imported. Findings on them are labelled.
 
+> **Note:** 1 statistics object(s) on HEAD could not be restored (usually expected for objects the migration changed); they are estimated. First: relation public.orders_customer_idx: ERROR: relation "public.orders_customer_idx" does not exist (SQLSTATE 42P01)
+
 ### `customer_lookup`
 
 - **ERROR** `lost_index` *(estimated)*: Index use lost on orders: a selective index is now unused, and the table is read by a sequential scan (about 500K rows).
@@ -25,7 +27,7 @@ PlanTwin catches PostgreSQL query-plan regressions in pull requests, using produ
 </details>
 ```
 
-*That is the built-in demo's real output (`plantwin demo`). The sample is from a pre-release build; see the quickstart verification for the current output.*
+*This is the real output of `plantwin demo`, from the fresh-clone check recorded in [docs/quickstart-verification.md](docs/quickstart-verification.md). The timing line is omitted here.*
 
 ## Quickstart
 

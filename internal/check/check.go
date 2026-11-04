@@ -256,6 +256,11 @@ func checkout(repo, ref string) (string, func(), error) {
 	if ref == "WORKTREE" {
 		return repo, func() {}, nil
 	}
+	// A ref that starts with '-' would be read by git as an option. Refuse it before calling git.
+	if strings.HasPrefix(ref, "-") || strings.TrimSpace(ref) == "" {
+		return "", func() {}, errs.New(fmt.Sprintf("%q is not a valid git ref.", ref),
+			"Use a branch, tag or commit, for example main or HEAD~1.", "invalid ref %q", ref)
+	}
 	dir, err := os.MkdirTemp("", "plantwin-wt-")
 	if err != nil {
 		return "", func() {}, err
