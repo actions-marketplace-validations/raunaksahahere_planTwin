@@ -1,0 +1,250 @@
+{
+ "Node Type": "Limit",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 706223.83,
+ "Total Cost": 706224.08,
+ "Plan Rows": 100,
+ "Plan Width": 75,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Sort",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 706223.83,
+   "Total Cost": 707459.58,
+   "Plan Rows": 494300,
+   "Plan Width": 75,
+   "Disabled": false,
+   "Sort Key": [
+    "orders.o_totalprice DESC",
+    "orders.o_orderdate"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Aggregate",
+     "Strategy": "Sorted",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 547616.87,
+     "Total Cost": 687332.04,
+     "Plan Rows": 494300,
+     "Plan Width": 75,
+     "Disabled": false,
+     "Group Key": [
+      "customer.c_custkey",
+      "orders.o_orderkey"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Gather Merge",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Startup Cost": 547616.87,
+       "Total Cost": 677446.04,
+       "Plan Rows": 494300,
+       "Plan Width": 48,
+       "Disabled": false,
+       "Workers Planned": 2,
+       "Plans": [
+        {
+         "Node Type": "Incremental Sort",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Startup Cost": 546616.85,
+         "Total Cost": 619391.53,
+         "Plan Rows": 205958,
+         "Plan Width": 48,
+         "Disabled": false,
+         "Sort Key": [
+          "customer.c_custkey",
+          "orders.o_orderkey"
+         ],
+         "Presorted Key": [
+          "customer.c_custkey"
+         ],
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Startup Cost": 546616.4,
+           "Total Cost": 612081.95,
+           "Plan Rows": 205958,
+           "Plan Width": 48,
+           "Disabled": false,
+           "Inner Unique": false,
+           "Plans": [
+            {
+             "Node Type": "Merge Join",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Startup Cost": 546615.97,
+             "Total Cost": 548137.99,
+             "Plan Rows": 51476,
+             "Plan Width": 51,
+             "Disabled": false,
+             "Inner Unique": true,
+             "Merge Cond": "(orders.o_custkey = customer.c_custkey)",
+             "Plans": [
+              {
+               "Node Type": "Sort",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Startup Cost": 525543.42,
+               "Total Cost": 525672.11,
+               "Plan Rows": 51476,
+               "Plan Width": 32,
+               "Disabled": false,
+               "Sort Key": [
+                "orders.o_custkey"
+               ],
+               "Plans": [
+                {
+                 "Node Type": "Hash Join",
+                 "Parent Relationship": "Outer",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Join Type": "Inner",
+                 "Startup Cost": 486720.38,
+                 "Total Cost": 521515.01,
+                 "Plan Rows": 51476,
+                 "Plan Width": 32,
+                 "Disabled": false,
+                 "Inner Unique": true,
+                 "Hash Cond": "(orders.o_orderkey = lineitem_1.l_orderkey)",
+                 "Plans": [
+                  {
+                   "Node Type": "Seq Scan",
+                   "Parent Relationship": "Outer",
+                   "Parallel Aware": true,
+                   "Async Capable": false,
+                   "Relation Name": "orders",
+                   "Alias": "orders",
+                   "Startup Cost": 0.0,
+                   "Total Cost": 33154.0,
+                   "Plan Rows": 625000,
+                   "Plan Width": 24,
+                   "Disabled": false
+                  },
+                  {
+                   "Node Type": "Hash",
+                   "Parent Relationship": "Inner",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Startup Cost": 485176.1,
+                   "Total Cost": 485176.1,
+                   "Plan Rows": 123543,
+                   "Plan Width": 8,
+                   "Disabled": false,
+                   "Plans": [
+                    {
+                     "Node Type": "Aggregate",
+                     "Strategy": "Sorted",
+                     "Partial Mode": "Simple",
+                     "Parent Relationship": "Outer",
+                     "Parallel Aware": false,
+                     "Async Capable": false,
+                     "Startup Cost": 0.43,
+                     "Total Cost": 485176.1,
+                     "Plan Rows": 123543,
+                     "Plan Width": 8,
+                     "Disabled": false,
+                     "Group Key": [
+                      "lineitem_1.l_orderkey"
+                     ],
+                     "Filter": "(sum(lineitem_1.l_quantity) > '300'::numeric)",
+                     "Plans": [
+                      {
+                       "Node Type": "Index Scan",
+                       "Parent Relationship": "Outer",
+                       "Parallel Aware": false,
+                       "Async Capable": false,
+                       "Scan Direction": "Forward",
+                       "Index Name": "lineitem_pkey",
+                       "Relation Name": "lineitem",
+                       "Alias": "lineitem_1",
+                       "Startup Cost": 0.43,
+                       "Total Cost": 449608.9,
+                       "Plan Rows": 6001552,
+                       "Plan Width": 13,
+                       "Disabled": false
+                      }
+                     ]
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              },
+              {
+               "Node Type": "Sort",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Startup Cost": 21072.45,
+               "Total Cost": 21447.45,
+               "Plan Rows": 150000,
+               "Plan Width": 23,
+               "Disabled": false,
+               "Sort Key": [
+                "customer.c_custkey"
+               ],
+               "Plans": [
+                {
+                 "Node Type": "Seq Scan",
+                 "Parent Relationship": "Outer",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Relation Name": "customer",
+                 "Alias": "customer",
+                 "Startup Cost": 0.0,
+                 "Total Cost": 5100.0,
+                 "Plan Rows": 150000,
+                 "Plan Width": 23,
+                 "Disabled": false
+                }
+               ]
+              }
+             ]
+            },
+            {
+             "Node Type": "Index Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "lineitem_pkey",
+             "Relation Name": "lineitem",
+             "Alias": "lineitem",
+             "Startup Cost": 0.43,
+             "Total Cost": 1.08,
+             "Plan Rows": 16,
+             "Plan Width": 13,
+             "Disabled": false,
+             "Index Cond": "(l_orderkey = orders.o_orderkey)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

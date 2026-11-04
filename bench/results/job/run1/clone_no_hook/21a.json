@@ -1,0 +1,266 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Plain",
+ "Partial Mode": "Simple",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 0.11,
+ "Total Cost": 0.12,
+ "Plan Rows": 1,
+ "Plan Width": 96,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Nested Loop",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Join Type": "Inner",
+   "Startup Cost": 0.0,
+   "Total Cost": 0.1,
+   "Plan Rows": 1,
+   "Plan Width": 48,
+   "Disabled": false,
+   "Inner Unique": true,
+   "Join Filter": "(ml.movie_id = t.id)",
+   "Plans": [
+    {
+     "Node Type": "Nested Loop",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Join Type": "Inner",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.09,
+     "Plan Rows": 1,
+     "Plan Width": 47,
+     "Disabled": false,
+     "Inner Unique": true,
+     "Join Filter": "(lt.id = ml.link_type_id)",
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.07,
+       "Plan Rows": 1,
+       "Plan Width": 39,
+       "Disabled": false,
+       "Inner Unique": false,
+       "Join Filter": "(mk.movie_id = ml.movie_id)",
+       "Plans": [
+        {
+         "Node Type": "Nested Loop",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.06,
+         "Plan Rows": 1,
+         "Plan Width": 31,
+         "Disabled": false,
+         "Inner Unique": true,
+         "Join Filter": "(k.id = mk.keyword_id)",
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Startup Cost": 0.0,
+           "Total Cost": 0.05,
+           "Plan Rows": 1,
+           "Plan Width": 35,
+           "Disabled": false,
+           "Inner Unique": false,
+           "Join Filter": "(mc.movie_id = mk.movie_id)",
+           "Plans": [
+            {
+             "Node Type": "Nested Loop",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Startup Cost": 0.0,
+             "Total Cost": 0.04,
+             "Plan Rows": 1,
+             "Plan Width": 27,
+             "Disabled": false,
+             "Inner Unique": false,
+             "Join Filter": "(mc.movie_id = mi.movie_id)",
+             "Plans": [
+              {
+               "Node Type": "Nested Loop",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Join Type": "Inner",
+               "Startup Cost": 0.0,
+               "Total Cost": 0.03,
+               "Plan Rows": 1,
+               "Plan Width": 23,
+               "Disabled": false,
+               "Inner Unique": true,
+               "Join Filter": "(ct.id = mc.company_type_id)",
+               "Plans": [
+                {
+                 "Node Type": "Nested Loop",
+                 "Parent Relationship": "Outer",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Join Type": "Inner",
+                 "Startup Cost": 0.0,
+                 "Total Cost": 0.01,
+                 "Plan Rows": 1,
+                 "Plan Width": 27,
+                 "Disabled": false,
+                 "Inner Unique": false,
+                 "Join Filter": "(cn.id = mc.company_id)",
+                 "Plans": [
+                  {
+                   "Node Type": "Seq Scan",
+                   "Parent Relationship": "Outer",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Relation Name": "company_name",
+                   "Alias": "cn",
+                   "Startup Cost": 0.0,
+                   "Total Cost": 0.0,
+                   "Plan Rows": 1,
+                   "Plan Width": 23,
+                   "Disabled": false,
+                   "Filter": "(((country_code)::text <> '[pl]'::text) AND ((name ~~ '%Film%'::text) OR (name ~~ '%Warner%'::text)))"
+                  },
+                  {
+                   "Node Type": "Seq Scan",
+                   "Parent Relationship": "Inner",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Relation Name": "movie_companies",
+                   "Alias": "mc",
+                   "Startup Cost": 0.0,
+                   "Total Cost": 0.0,
+                   "Plan Rows": 1,
+                   "Plan Width": 12,
+                   "Disabled": false,
+                   "Filter": "(note IS NULL)"
+                  }
+                 ]
+                },
+                {
+                 "Node Type": "Seq Scan",
+                 "Parent Relationship": "Inner",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Relation Name": "company_type",
+                 "Alias": "ct",
+                 "Startup Cost": 0.0,
+                 "Total Cost": 0.0,
+                 "Plan Rows": 1,
+                 "Plan Width": 4,
+                 "Disabled": false,
+                 "Filter": "((kind)::text = 'production companies'::text)"
+                }
+               ]
+              },
+              {
+               "Node Type": "Seq Scan",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Relation Name": "movie_info",
+               "Alias": "mi",
+               "Startup Cost": 0.0,
+               "Total Cost": 0.0,
+               "Plan Rows": 1,
+               "Plan Width": 4,
+               "Disabled": false,
+               "Filter": "(info = ANY ('{Sweden,Norway,Germany,Denmark,Swedish,Denish,Norwegian,German}'::text[]))"
+              }
+             ]
+            },
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "movie_keyword",
+             "Alias": "mk",
+             "Startup Cost": 0.0,
+             "Total Cost": 0.0,
+             "Plan Rows": 1,
+             "Plan Width": 8,
+             "Disabled": false
+            }
+           ]
+          },
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "keyword",
+           "Alias": "k",
+           "Startup Cost": 0.0,
+           "Total Cost": 0.0,
+           "Plan Rows": 1,
+           "Plan Width": 4,
+           "Disabled": false,
+           "Filter": "(keyword = 'sequel'::text)"
+          }
+         ]
+        },
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "movie_link",
+         "Alias": "ml",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.0,
+         "Plan Rows": 1,
+         "Plan Width": 8,
+         "Disabled": false
+        }
+       ]
+      },
+      {
+       "Node Type": "Seq Scan",
+       "Parent Relationship": "Inner",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "link_type",
+       "Alias": "lt",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.0,
+       "Plan Rows": 1,
+       "Plan Width": 16,
+       "Disabled": false,
+       "Filter": "((link)::text ~~ '%follow%'::text)"
+      }
+     ]
+    },
+    {
+     "Node Type": "Seq Scan",
+     "Parent Relationship": "Inner",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Relation Name": "title",
+     "Alias": "t",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.0,
+     "Plan Rows": 1,
+     "Plan Width": 21,
+     "Disabled": false,
+     "Filter": "((production_year >= 1950) AND (production_year <= 2000))"
+    }
+   ]
+  }
+ ]
+}

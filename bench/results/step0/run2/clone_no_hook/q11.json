@@ -1,0 +1,195 @@
+{
+ "Node Type": "Sort",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 0.11,
+ "Total Cost": 0.11,
+ "Plan Rows": 1,
+ "Plan Width": 36,
+ "Disabled": false,
+ "Sort Key": [
+  "(sum((partsupp.ps_supplycost * (partsupp.ps_availqty)::numeric))) DESC"
+ ],
+ "Plans": [
+  {
+   "Node Type": "Aggregate",
+   "Strategy": "Plain",
+   "Partial Mode": "Simple",
+   "Parent Relationship": "InitPlan",
+   "Subplan Name": "InitPlan 1",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 0.04,
+   "Total Cost": 0.05,
+   "Plan Rows": 1,
+   "Plan Width": 32,
+   "Disabled": false,
+   "Plans": [
+    {
+     "Node Type": "Nested Loop",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Join Type": "Inner",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.03,
+     "Plan Rows": 1,
+     "Plan Width": 10,
+     "Disabled": false,
+     "Inner Unique": true,
+     "Join Filter": "(nation_1.n_nationkey = supplier_1.s_nationkey)",
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.01,
+       "Plan Rows": 1,
+       "Plan Width": 14,
+       "Disabled": false,
+       "Inner Unique": true,
+       "Join Filter": "(partsupp_1.ps_suppkey = supplier_1.s_suppkey)",
+       "Plans": [
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "partsupp",
+         "Alias": "partsupp_1",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.0,
+         "Plan Rows": 1,
+         "Plan Width": 14,
+         "Disabled": false
+        },
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "supplier",
+         "Alias": "supplier_1",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.0,
+         "Plan Rows": 1,
+         "Plan Width": 8,
+         "Disabled": false
+        }
+       ]
+      },
+      {
+       "Node Type": "Seq Scan",
+       "Parent Relationship": "Inner",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "nation",
+       "Alias": "nation_1",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.0,
+       "Plan Rows": 1,
+       "Plan Width": 4,
+       "Disabled": false,
+       "Filter": "(n_name = 'GERMANY'::bpchar)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Node Type": "Aggregate",
+   "Strategy": "Hashed",
+   "Partial Mode": "Simple",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 0.04,
+   "Total Cost": 0.05,
+   "Plan Rows": 1,
+   "Plan Width": 36,
+   "Disabled": false,
+   "Group Key": [
+    "partsupp.ps_partkey"
+   ],
+   "Filter": "(sum((partsupp.ps_supplycost * (partsupp.ps_availqty)::numeric)) > (InitPlan 1).col1)",
+   "Planned Partitions": 0,
+   "Plans": [
+    {
+     "Node Type": "Nested Loop",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Join Type": "Inner",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.03,
+     "Plan Rows": 1,
+     "Plan Width": 14,
+     "Disabled": false,
+     "Inner Unique": true,
+     "Join Filter": "(nation.n_nationkey = supplier.s_nationkey)",
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.01,
+       "Plan Rows": 1,
+       "Plan Width": 18,
+       "Disabled": false,
+       "Inner Unique": true,
+       "Join Filter": "(partsupp.ps_suppkey = supplier.s_suppkey)",
+       "Plans": [
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "partsupp",
+         "Alias": "partsupp",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.0,
+         "Plan Rows": 1,
+         "Plan Width": 18,
+         "Disabled": false
+        },
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "supplier",
+         "Alias": "supplier",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.0,
+         "Plan Rows": 1,
+         "Plan Width": 8,
+         "Disabled": false
+        }
+       ]
+      },
+      {
+       "Node Type": "Seq Scan",
+       "Parent Relationship": "Inner",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "nation",
+       "Alias": "nation",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.0,
+       "Plan Rows": 1,
+       "Plan Width": 4,
+       "Disabled": false,
+       "Filter": "(n_name = 'GERMANY'::bpchar)"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

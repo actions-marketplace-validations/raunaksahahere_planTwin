@@ -1,0 +1,25 @@
+query    shape  populated (top, rows)                        clone (top, rows)                           
+q01      DIFF   Aggregate rows=6                             Aggregate rows=1                            
+q02      DIFF   Limit rows=1                                 Limit rows=1                                
+q03      DIFF   Limit rows=10                                Limit rows=1                                
+q04      DIFF   Aggregate rows=5                             Aggregate rows=1                            
+q05      DIFF   Sort rows=25                                 Sort rows=1                                 
+q06      DIFF   Aggregate rows=1                             Aggregate rows=1                            
+q07      DIFF   Aggregate rows=6053                          Aggregate rows=1                            
+q08      DIFF   Aggregate rows=2406                          Aggregate rows=1                            
+q09      DIFF   Aggregate rows=239                           Aggregate rows=1                            
+q10      DIFF   Limit rows=20                                Limit rows=1                                
+q11      DIFF   Sort rows=10656                              Sort rows=1                                 
+q12      DIFF   Aggregate rows=7                             Aggregate rows=1                            
+q13      DIFF   Sort rows=200                                Sort rows=1                                 
+q14      DIFF   Aggregate rows=1                             Aggregate rows=1                            
+q15      DIFF   Nested Loop rows=50                          Sort rows=1                                 
+q16      DIFF   Sort rows=15987                              Sort rows=1                                 
+q17      DIFF   Aggregate rows=1                             Aggregate rows=1                            
+q18      DIFF   Limit rows=100                               Limit rows=1                                
+q19      DIFF   Aggregate rows=1                             Aggregate rows=1                            
+q20      DIFF   Sort rows=106                                Sort rows=1                                 
+q21      DIFF   Limit rows=1                                 Limit rows=1                                
+q22      DIFF   Aggregate rows=715                           Aggregate rows=1                            
+
+shape agreement: 0/22

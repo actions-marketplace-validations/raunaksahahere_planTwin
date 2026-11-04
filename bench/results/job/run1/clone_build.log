@@ -1,0 +1,7 @@
+ set_config 
+------------
+ 
+(1 row)
+
+stats restore errors: 0
+clone job_clone built: 175 relations with imported reltuples; physical table bytes: 0

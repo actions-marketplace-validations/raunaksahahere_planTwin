@@ -1,0 +1,163 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Sorted",
+ "Partial Mode": "Simple",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 51317.36,
+ "Total Cost": 51422.05,
+ "Plan Rows": 740,
+ "Plan Width": 72,
+ "Disabled": false,
+ "Group Key": [
+  "(SUBSTRING(customer.c_phone FROM 1 FOR 2))"
+ ],
+ "Plans": [
+  {
+   "Node Type": "Aggregate",
+   "Strategy": "Plain",
+   "Partial Mode": "Finalize",
+   "Parent Relationship": "InitPlan",
+   "Subplan Name": "InitPlan 1",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 6245.82,
+   "Total Cost": 6245.83,
+   "Plan Rows": 1,
+   "Plan Width": 32,
+   "Disabled": false,
+   "Plans": [
+    {
+     "Node Type": "Gather",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 6245.59,
+     "Total Cost": 6245.8,
+     "Plan Rows": 2,
+     "Plan Width": 32,
+     "Disabled": false,
+     "Workers Planned": 2,
+     "Single Copy": false,
+     "Plans": [
+      {
+       "Node Type": "Aggregate",
+       "Strategy": "Plain",
+       "Partial Mode": "Partial",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Startup Cost": 5245.59,
+       "Total Cost": 5245.6,
+       "Plan Rows": 1,
+       "Plan Width": 32,
+       "Disabled": false,
+       "Plans": [
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": true,
+         "Async Capable": false,
+         "Relation Name": "customer",
+         "Alias": "customer_1",
+         "Startup Cost": 0.0,
+         "Total Cost": 5240.62,
+         "Plan Rows": 1987,
+         "Plan Width": 6,
+         "Disabled": false,
+         "Filter": "((c_acctbal > 0.00) AND (SUBSTRING(c_phone FROM 1 FOR 2) = ANY ('{13,31,23,29,30,18,17}'::text[])))"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Node Type": "Gather Merge",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 45071.53,
+   "Total Cost": 45157.72,
+   "Plan Rows": 740,
+   "Plan Width": 38,
+   "Disabled": false,
+   "Workers Planned": 2,
+   "Plans": [
+    {
+     "Node Type": "Sort",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 44071.51,
+     "Total Cost": 44072.28,
+     "Plan Rows": 308,
+     "Plan Width": 38,
+     "Disabled": false,
+     "Sort Key": [
+      "(SUBSTRING(customer.c_phone FROM 1 FOR 2))"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Hash Join",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": true,
+       "Async Capable": false,
+       "Join Type": "Right Anti",
+       "Startup Cost": 5249.74,
+       "Total Cost": 44058.78,
+       "Plan Rows": 308,
+       "Plan Width": 38,
+       "Disabled": false,
+       "Inner Unique": true,
+       "Hash Cond": "(orders.o_custkey = customer.c_custkey)",
+       "Plans": [
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": true,
+         "Async Capable": false,
+         "Relation Name": "orders",
+         "Alias": "orders",
+         "Startup Cost": 0.0,
+         "Total Cost": 33154.0,
+         "Plan Rows": 625000,
+         "Plan Width": 4,
+         "Disabled": false
+        },
+        {
+         "Node Type": "Hash",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": true,
+         "Async Capable": false,
+         "Startup Cost": 5240.62,
+         "Total Cost": 5240.62,
+         "Plan Rows": 729,
+         "Plan Width": 26,
+         "Disabled": false,
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": true,
+           "Async Capable": false,
+           "Relation Name": "customer",
+           "Alias": "customer",
+           "Startup Cost": 0.0,
+           "Total Cost": 5240.62,
+           "Plan Rows": 729,
+           "Plan Width": 26,
+           "Disabled": false,
+           "Filter": "((c_acctbal > (InitPlan 1).col1) AND (SUBSTRING(c_phone FROM 1 FOR 2) = ANY ('{13,31,23,29,30,18,17}'::text[])))"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

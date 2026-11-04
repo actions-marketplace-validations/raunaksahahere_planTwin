@@ -1,0 +1,208 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Plain",
+ "Partial Mode": "Simple",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 0.08,
+ "Total Cost": 0.09,
+ "Plan Rows": 1,
+ "Plan Width": 96,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Nested Loop",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Join Type": "Inner",
+   "Startup Cost": 0.0,
+   "Total Cost": 0.07,
+   "Plan Rows": 1,
+   "Plan Width": 64,
+   "Disabled": false,
+   "Inner Unique": true,
+   "Join Filter": "(mi.movie_id = t.id)",
+   "Plans": [
+    {
+     "Node Type": "Nested Loop",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Join Type": "Inner",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.06,
+     "Plan Rows": 1,
+     "Plan Width": 59,
+     "Disabled": false,
+     "Inner Unique": true,
+     "Join Filter": "(ci.person_id = n.id)",
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.05,
+       "Plan Rows": 1,
+       "Plan Width": 63,
+       "Disabled": false,
+       "Inner Unique": true,
+       "Join Filter": "(it2.id = mi_idx.info_type_id)",
+       "Plans": [
+        {
+         "Node Type": "Nested Loop",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.04,
+         "Plan Rows": 1,
+         "Plan Width": 67,
+         "Disabled": false,
+         "Inner Unique": false,
+         "Join Filter": "(mi.movie_id = mi_idx.movie_id)",
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Startup Cost": 0.0,
+           "Total Cost": 0.03,
+           "Plan Rows": 1,
+           "Plan Width": 54,
+           "Disabled": false,
+           "Inner Unique": true,
+           "Join Filter": "(it1.id = mi.info_type_id)",
+           "Plans": [
+            {
+             "Node Type": "Nested Loop",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Startup Cost": 0.0,
+             "Total Cost": 0.01,
+             "Plan Rows": 1,
+             "Plan Width": 58,
+             "Disabled": false,
+             "Inner Unique": false,
+             "Join Filter": "(ci.movie_id = mi.movie_id)",
+             "Plans": [
+              {
+               "Node Type": "Seq Scan",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Relation Name": "cast_info",
+               "Alias": "ci",
+               "Startup Cost": 0.0,
+               "Total Cost": 0.0,
+               "Plan Rows": 1,
+               "Plan Width": 8,
+               "Disabled": false,
+               "Filter": "(note = ANY ('{(writer),\"(head writer)\",\"(written by)\",(story),\"(story editor)\"}'::text[]))"
+              },
+              {
+               "Node Type": "Seq Scan",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Relation Name": "movie_info",
+               "Alias": "mi",
+               "Startup Cost": 0.0,
+               "Total Cost": 0.0,
+               "Plan Rows": 1,
+               "Plan Width": 50,
+               "Disabled": false,
+               "Filter": "((note IS NULL) AND (info = ANY ('{Horror,Thriller}'::text[])))"
+              }
+             ]
+            },
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "info_type",
+             "Alias": "it1",
+             "Startup Cost": 0.0,
+             "Total Cost": 0.0,
+             "Plan Rows": 1,
+             "Plan Width": 4,
+             "Disabled": false,
+             "Filter": "((info)::text = 'genres'::text)"
+            }
+           ]
+          },
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "movie_info_idx",
+           "Alias": "mi_idx",
+           "Startup Cost": 0.0,
+           "Total Cost": 0.0,
+           "Plan Rows": 1,
+           "Plan Width": 13,
+           "Disabled": false,
+           "Filter": "(info > '8.0'::text)"
+          }
+         ]
+        },
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "info_type",
+         "Alias": "it2",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.0,
+         "Plan Rows": 1,
+         "Plan Width": 4,
+         "Disabled": false,
+         "Filter": "((info)::text = 'rating'::text)"
+        }
+       ]
+      },
+      {
+       "Node Type": "Seq Scan",
+       "Parent Relationship": "Inner",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "name",
+       "Alias": "n",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.0,
+       "Plan Rows": 1,
+       "Plan Width": 4,
+       "Disabled": false,
+       "Filter": "((gender IS NOT NULL) AND ((gender)::text = 'f'::text))"
+      }
+     ]
+    },
+    {
+     "Node Type": "Seq Scan",
+     "Parent Relationship": "Inner",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Relation Name": "title",
+     "Alias": "t",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.0,
+     "Plan Rows": 1,
+     "Plan Width": 21,
+     "Disabled": false,
+     "Filter": "((production_year >= 2008) AND (production_year <= 2014))"
+    }
+   ]
+  }
+ ]
+}

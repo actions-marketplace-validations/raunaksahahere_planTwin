@@ -1,0 +1,121 @@
+{
+ "Node Type": "Sort",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 0.1,
+ "Total Cost": 0.11,
+ "Plan Rows": 1,
+ "Plan Width": 103,
+ "Disabled": false,
+ "Sort Key": [
+  "supplier.s_suppkey"
+ ],
+ "Plans": [
+  {
+   "Node Type": "Aggregate",
+   "Strategy": "Hashed",
+   "Partial Mode": "Simple",
+   "Parent Relationship": "InitPlan",
+   "Subplan Name": "CTE revenue",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 0.01,
+   "Total Cost": 0.02,
+   "Plan Rows": 1,
+   "Plan Width": 36,
+   "Disabled": false,
+   "Group Key": [
+    "lineitem.l_suppkey"
+   ],
+   "Planned Partitions": 0,
+   "Plans": [
+    {
+     "Node Type": "Seq Scan",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Relation Name": "lineitem",
+     "Alias": "lineitem",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.0,
+     "Plan Rows": 1,
+     "Plan Width": 16,
+     "Disabled": false,
+     "Filter": "((l_shipdate >= '1996-01-01'::date) AND (l_shipdate < '1996-04-01'::date))"
+    }
+   ]
+  },
+  {
+   "Node Type": "Aggregate",
+   "Strategy": "Plain",
+   "Partial Mode": "Simple",
+   "Parent Relationship": "InitPlan",
+   "Subplan Name": "InitPlan 2",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 0.02,
+   "Total Cost": 0.03,
+   "Plan Rows": 1,
+   "Plan Width": 32,
+   "Disabled": false,
+   "Plans": [
+    {
+     "Node Type": "CTE Scan",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "CTE Name": "revenue",
+     "Alias": "revenue_1",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.02,
+     "Plan Rows": 1,
+     "Plan Width": 32,
+     "Disabled": false
+    }
+   ]
+  },
+  {
+   "Node Type": "Nested Loop",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Join Type": "Inner",
+   "Startup Cost": 0.0,
+   "Total Cost": 0.04,
+   "Plan Rows": 1,
+   "Plan Width": 103,
+   "Disabled": false,
+   "Inner Unique": false,
+   "Join Filter": "(supplier.s_suppkey = revenue.supplier_no)",
+   "Plans": [
+    {
+     "Node Type": "Seq Scan",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Relation Name": "supplier",
+     "Alias": "supplier",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.0,
+     "Plan Rows": 1,
+     "Plan Width": 71,
+     "Disabled": false
+    },
+    {
+     "Node Type": "CTE Scan",
+     "Parent Relationship": "Inner",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "CTE Name": "revenue",
+     "Alias": "revenue",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.02,
+     "Plan Rows": 1,
+     "Plan Width": 36,
+     "Disabled": false,
+     "Filter": "(total_revenue = (InitPlan 2).col1)"
+    }
+   ]
+  }
+ ]
+}

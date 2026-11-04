@@ -1,0 +1,25 @@
+query    shape  populated (top, rows)                        clone (top, rows)                           
+q01      same   Aggregate rows=6                             Aggregate rows=6                            
+q02      same   Limit rows=1                                 Limit rows=1                                
+q03      same   Limit rows=10                                Limit rows=10                               
+q04      same   Aggregate rows=5                             Aggregate rows=5                            
+q05      same   Sort rows=25                                 Sort rows=25                                
+q06      same   Aggregate rows=1                             Aggregate rows=1                            
+q07      same   Aggregate rows=6053                          Aggregate rows=6053                         
+q08      same   Aggregate rows=2406                          Aggregate rows=2406                         
+q09      same   Aggregate rows=239                           Aggregate rows=239                          
+q10      same   Limit rows=20                                Limit rows=20                               
+q11      same   Sort rows=10656                              Sort rows=10656                             
+q12      same   Aggregate rows=7                             Aggregate rows=7                            
+q13      same   Sort rows=200                                Sort rows=200                               
+q14      same   Aggregate rows=1                             Aggregate rows=1                            
+q15      same   Nested Loop rows=50                          Nested Loop rows=50                         
+q16      same   Sort rows=15987                              Sort rows=15987                             
+q17      same   Aggregate rows=1                             Aggregate rows=1                            
+q18      same   Limit rows=100                               Limit rows=100                              
+q19      same   Aggregate rows=1                             Aggregate rows=1                            
+q20      same   Sort rows=106                                Sort rows=106                               
+q21      same   Limit rows=1                                 Limit rows=1                                
+q22      same   Aggregate rows=715                           Aggregate rows=715                          
+
+shape agreement: 22/22

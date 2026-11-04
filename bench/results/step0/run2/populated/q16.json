@@ -1,0 +1,145 @@
+{
+ "Node Type": "Sort",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 40413.6,
+ "Total Cost": 40453.57,
+ "Plan Rows": 15987,
+ "Plan Width": 44,
+ "Disabled": false,
+ "Sort Key": [
+  "(count(DISTINCT partsupp.ps_suppkey)) DESC",
+  "part.p_brand",
+  "part.p_type",
+  "part.p_size"
+ ],
+ "Plans": [
+  {
+   "Node Type": "Aggregate",
+   "Strategy": "Sorted",
+   "Partial Mode": "Simple",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 31717.05,
+   "Total Cost": 39297.34,
+   "Plan Rows": 15987,
+   "Plan Width": 44,
+   "Disabled": false,
+   "Group Key": [
+    "part.p_brand",
+    "part.p_type",
+    "part.p_size"
+   ],
+   "Plans": [
+    {
+     "Node Type": "Gather Merge",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 31717.05,
+     "Total Cost": 38550.72,
+     "Plan Rows": 58675,
+     "Plan Width": 40,
+     "Disabled": false,
+     "Workers Planned": 2,
+     "Plans": [
+      {
+       "Node Type": "Sort",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Startup Cost": 30717.02,
+       "Total Cost": 30778.14,
+       "Plan Rows": 24448,
+       "Plan Width": 40,
+       "Disabled": false,
+       "Sort Key": [
+        "part.p_brand",
+        "part.p_type",
+        "part.p_size",
+        "partsupp.ps_suppkey"
+       ],
+       "Plans": [
+        {
+         "Node Type": "Hash Join",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": true,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Startup Cost": 6770.9,
+         "Total Cost": 28935.08,
+         "Plan Rows": 24448,
+         "Plan Width": 40,
+         "Disabled": false,
+         "Inner Unique": true,
+         "Hash Cond": "(partsupp.ps_partkey = part.p_partkey)",
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": true,
+           "Async Capable": false,
+           "Relation Name": "partsupp",
+           "Alias": "partsupp",
+           "Startup Cost": 405.0,
+           "Total Cost": 22131.67,
+           "Plan Rows": 166667,
+           "Plan Width": 8,
+           "Disabled": false,
+           "Filter": "(NOT (ANY (ps_suppkey = (hashed SubPlan 1).col1)))",
+           "Plans": [
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "SubPlan",
+             "Subplan Name": "SubPlan 1",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "supplier",
+             "Alias": "supplier",
+             "Startup Cost": 0.0,
+             "Total Cost": 405.0,
+             "Plan Rows": 1,
+             "Plan Width": 4,
+             "Disabled": false,
+             "Filter": "((s_comment)::text ~~ '%Customer%Complaints%'::text)"
+            }
+           ]
+          },
+          {
+           "Node Type": "Hash",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": true,
+           "Async Capable": false,
+           "Startup Cost": 6211.33,
+           "Total Cost": 6211.33,
+           "Plan Rows": 12365,
+           "Plan Width": 40,
+           "Disabled": false,
+           "Plans": [
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": true,
+             "Async Capable": false,
+             "Relation Name": "part",
+             "Alias": "part",
+             "Startup Cost": 0.0,
+             "Total Cost": 6211.33,
+             "Plan Rows": 12365,
+             "Plan Width": 40,
+             "Disabled": false,
+             "Filter": "((p_brand <> 'Brand#45'::bpchar) AND ((p_type)::text !~~ 'MEDIUM POLISHED%'::text) AND (p_size = ANY ('{49,14,23,45,19,3,36,9}'::integer[])))"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

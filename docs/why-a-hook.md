@@ -21,30 +21,40 @@ planner hook closes it; that needs the extension, which waits for design review.
 5. `record_plans.py pt18 tpch_clone ...` records the clone's plans.
 6. `compare_plans.py` compares plan shapes (node types, relations, indexes, join types; estimates excluded).
 
-## Result (no hook)
-- Clone check: `lineitem` has 0 rows, but `pg_class` holds the imported `reltuples` (6.0e6).
-- **Shape agreement: 0/22.**
-- Populated top-node costs range from 52,106 to 1.9e9. Every clone top node costs between
-  0.02 and 0.15, with `rows=1`.
-- Full table: `bench/results/step0/comparison_no_hook.md`; raw plans: `bench/results/step0/`.
+## Result
 
-This matches the mechanism in the design note: with 0 physical blocks, the planner estimates
-0 tuples whatever the imported statistics say.
+Numbers come from `bench/results/fidelity.md`, generated from raw plans by `bench/spike/fidelity_report.py`.
+
+| Benchmark | Run | Shape agreement, no hook | Shape agreement, with hook | Full tree identical (hook) |
+|---|---|---:|---:|---:|
+| TPC-H SF1 (22) | run 1 | 0/22 | 22/22 | 21/22 |
+| TPC-H SF1 (22) | run 2 | 0/22 | 22/22 | 21/22 |
+| JOB (113) | run 1 | 0/113 | 112/113 | 112/113 |
+| JOB (113) | run 2 | 0/113 | 113/113 | 113/113 |
+
+- Without the hook, the empty clone estimates `rows=1` for every table, and its top-node costs are
+  between 0.02 and 0.15 on TPC-H, against 40,585 to 1.9e9 for the populated database (run 1).
+- With the hook, the clone's top-node cost matches the populated database to within 0.041% on every
+  query (median 0%). The single shape mismatch (JOB 33a, run 1) is a near-tie, and its cause is not identified.
+
+## What the hook changes
+
+Four inputs are overridden from imported `pg_class` values: table pages, tuples and allvisfrac; index pages
+and tuples; and the B-tree height, which is estimated (ADR-0002). The height override was needed: with the height
+at 0, index scans on the clone cost 0.00 (see the statistics note below).
+
+## Run-to-run noise
+
+`ANALYZE` samples rows at random. On TPC-H, the populated database's top costs move by up to 6.07% between runs,
+with all 22 shapes unchanged. On JOB, the shapes of 31 of 113 populated plans change between runs, and the clone
+with the hook changes in exactly the same 31 queries. Full trees are never identical across runs. Treat any single
+run as one sample.
 
 ## Reproducibility notes
-- `ANALYZE` samples rows at random, so cost figures move between runs (q01 measured
-  234,058 in one run and 233,992 in another). The 0/22 result repeated across two full
-  runs; I did not diff the populated plan trees between runs. Report costs as ranges, not exact values.
-- Extended statistics: a `CREATE STATISTICS` object on `lineitem` was not restored by
-  `pg_dump --statistics-only` (the dump has no extended-statistics restore call). The PG18
-  release note says "Extended statistics are not preserved" under the **pg_upgrade** item, so
-  I cite that note and mark this dump-path behaviour as observed, not documented.
-  Source: https://www.postgresql.org/docs/18/release-18.html (section E.6.3.7.2, pg_upgrade).
+- Benchmark containers run with `autovacuum=off` (ADR-0005). The first JOB attempt ran with autovacuum on
+  and showed a snapshot-skew artifact, which was fixed and is not in the results.
+- Extended statistics are not restored by the stats dump (ADR-0004). Source: https://www.postgresql.org/docs/18/release-18.html
+  (pg_upgrade item, section E.6.3.7.2). The dump path was checked on TPC-H.
 
-## Synthetic cross-check
-`bench/spike/synthetic_repro.sh` shows the same effect on a 1M-row table in seconds.
-
-## Not yet shown
-- That the hook makes the clone match production. This needs the extension, which is not
-  written until the design note is approved.
-- Fidelity beyond the 22 TPC-H queries (JOB is a later phase).
+## Limits of this evidence
+See the "How to read this" section of `bench/results/fidelity.md`.

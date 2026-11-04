@@ -1,0 +1,101 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Plain",
+ "Partial Mode": "Simple",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 0.02,
+ "Total Cost": 0.03,
+ "Plan Rows": 1,
+ "Plan Width": 32,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Hash Join",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Join Type": "Inner",
+   "Startup Cost": 0.01,
+   "Total Cost": 0.02,
+   "Plan Rows": 1,
+   "Plan Width": 8,
+   "Disabled": false,
+   "Inner Unique": true,
+   "Hash Cond": "(lineitem.l_partkey = part.p_partkey)",
+   "Join Filter": "(lineitem.l_quantity < (SubPlan 1))",
+   "Plans": [
+    {
+     "Node Type": "Seq Scan",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Relation Name": "lineitem",
+     "Alias": "lineitem",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.0,
+     "Plan Rows": 1,
+     "Plan Width": 17,
+     "Disabled": false
+    },
+    {
+     "Node Type": "Hash",
+     "Parent Relationship": "Inner",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 0.0,
+     "Total Cost": 0.0,
+     "Plan Rows": 1,
+     "Plan Width": 4,
+     "Disabled": false,
+     "Plans": [
+      {
+       "Node Type": "Seq Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "part",
+       "Alias": "part",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.0,
+       "Plan Rows": 1,
+       "Plan Width": 4,
+       "Disabled": false,
+       "Filter": "((p_brand = 'Brand#23'::bpchar) AND (p_container = 'MED BOX'::bpchar))"
+      }
+     ]
+    },
+    {
+     "Node Type": "Aggregate",
+     "Strategy": "Plain",
+     "Partial Mode": "Simple",
+     "Parent Relationship": "SubPlan",
+     "Subplan Name": "SubPlan 1",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 0.01,
+     "Total Cost": 0.02,
+     "Plan Rows": 1,
+     "Plan Width": 32,
+     "Disabled": false,
+     "Plans": [
+      {
+       "Node Type": "Seq Scan",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "lineitem",
+       "Alias": "lineitem_1",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.0,
+       "Plan Rows": 1,
+       "Plan Width": 5,
+       "Disabled": false,
+       "Filter": "(l_partkey = part.p_partkey)"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

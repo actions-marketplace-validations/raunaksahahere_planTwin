@@ -1,0 +1,121 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Sorted",
+ "Partial Mode": "Finalize",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 214000.48,
+ "Total Cost": 214240.29,
+ "Plan Rows": 7,
+ "Plan Width": 27,
+ "Disabled": false,
+ "Group Key": [
+  "lineitem.l_shipmode"
+ ],
+ "Plans": [
+  {
+   "Node Type": "Gather Merge",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Startup Cost": 214000.48,
+   "Total Cost": 214240.09,
+   "Plan Rows": 17,
+   "Plan Width": 27,
+   "Disabled": false,
+   "Workers Planned": 2,
+   "Plans": [
+    {
+     "Node Type": "Aggregate",
+     "Strategy": "Sorted",
+     "Partial Mode": "Partial",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Startup Cost": 213000.45,
+     "Total Cost": 213238.1,
+     "Plan Rows": 7,
+     "Plan Width": 27,
+     "Disabled": false,
+     "Group Key": [
+      "lineitem.l_shipmode"
+     ],
+     "Plans": [
+      {
+       "Node Type": "Sort",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Startup Cost": 213000.45,
+       "Total Cost": 213030.15,
+       "Plan Rows": 11879,
+       "Plan Width": 27,
+       "Disabled": false,
+       "Sort Key": [
+        "lineitem.l_shipmode"
+       ],
+       "Plans": [
+        {
+         "Node Type": "Hash Join",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": true,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Startup Cost": 171961.72,
+         "Total Cost": 212196.47,
+         "Plan Rows": 11879,
+         "Plan Width": 27,
+         "Disabled": false,
+         "Inner Unique": false,
+         "Hash Cond": "(orders.o_orderkey = lineitem.l_orderkey)",
+         "Plans": [
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": true,
+           "Async Capable": false,
+           "Relation Name": "orders",
+           "Alias": "orders",
+           "Startup Cost": 0.0,
+           "Total Cost": 33154.0,
+           "Plan Rows": 625000,
+           "Plan Width": 24,
+           "Disabled": false
+          },
+          {
+           "Node Type": "Hash",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": true,
+           "Async Capable": false,
+           "Startup Cost": 171813.24,
+           "Total Cost": 171813.24,
+           "Plan Rows": 11879,
+           "Plan Width": 19,
+           "Disabled": false,
+           "Plans": [
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": true,
+             "Async Capable": false,
+             "Relation Name": "lineitem",
+             "Alias": "lineitem",
+             "Startup Cost": 0.0,
+             "Total Cost": 171813.24,
+             "Plan Rows": 11879,
+             "Plan Width": 19,
+             "Disabled": false,
+             "Filter": "((l_shipmode = ANY ('{MAIL,SHIP}'::bpchar[])) AND (l_commitdate < l_receiptdate) AND (l_shipdate < l_commitdate) AND (l_receiptdate >= '1994-01-01'::date) AND (l_receiptdate < '1995-01-01'::date))"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

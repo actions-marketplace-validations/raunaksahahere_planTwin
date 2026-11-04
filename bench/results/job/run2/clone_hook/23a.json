@@ -1,0 +1,407 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Plain",
+ "Partial Mode": "Simple",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 57978.11,
+ "Total Cost": 57978.12,
+ "Plan Rows": 1,
+ "Plan Width": 64,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Nested Loop",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Join Type": "Inner",
+   "Startup Cost": 4243.91,
+   "Total Cost": 57978.1,
+   "Plan Rows": 1,
+   "Plan Width": 27,
+   "Disabled": false,
+   "Inner Unique": true,
+   "Plans": [
+    {
+     "Node Type": "Nested Loop",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Join Type": "Inner",
+     "Startup Cost": 4243.49,
+     "Total Cost": 57977.66,
+     "Plan Rows": 1,
+     "Plan Width": 31,
+     "Disabled": false,
+     "Inner Unique": true,
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Startup Cost": 4243.36,
+       "Total Cost": 57977.51,
+       "Plan Rows": 1,
+       "Plan Width": 35,
+       "Disabled": false,
+       "Inner Unique": true,
+       "Plans": [
+        {
+         "Node Type": "Nested Loop",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Startup Cost": 4242.94,
+         "Total Cost": 57977.06,
+         "Plan Rows": 1,
+         "Plan Width": 39,
+         "Disabled": false,
+         "Inner Unique": false,
+         "Join Filter": "(mc.movie_id = t.id)",
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Startup Cost": 4242.51,
+           "Total Cost": 57976.46,
+           "Plan Rows": 1,
+           "Plan Width": 47,
+           "Disabled": false,
+           "Inner Unique": false,
+           "Plans": [
+            {
+             "Node Type": "Gather",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Startup Cost": 4242.07,
+             "Total Cost": 57974.65,
+             "Plan Rows": 1,
+             "Plan Width": 39,
+             "Disabled": false,
+             "Workers Planned": 2,
+             "Single Copy": false,
+             "Plans": [
+              {
+               "Node Type": "Nested Loop",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Join Type": "Inner",
+               "Startup Cost": 3242.07,
+               "Total Cost": 56974.55,
+               "Plan Rows": 1,
+               "Plan Width": 39,
+               "Disabled": false,
+               "Inner Unique": true,
+               "Plans": [
+                {
+                 "Node Type": "Nested Loop",
+                 "Parent Relationship": "Outer",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Join Type": "Inner",
+                 "Startup Cost": 3241.92,
+                 "Total Cost": 56974.34,
+                 "Plan Rows": 1,
+                 "Plan Width": 43,
+                 "Disabled": false,
+                 "Inner Unique": false,
+                 "Plans": [
+                  {
+                   "Node Type": "Hash Join",
+                   "Parent Relationship": "Outer",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Join Type": "Inner",
+                   "Startup Cost": 3241.49,
+                   "Total Cost": 54695.03,
+                   "Plan Rows": 1104,
+                   "Plan Width": 35,
+                   "Disabled": false,
+                   "Inner Unique": true,
+                   "Hash Cond": "(t.kind_id = kt.id)",
+                   "Plans": [
+                    {
+                     "Node Type": "Hash Join",
+                     "Parent Relationship": "Outer",
+                     "Parallel Aware": false,
+                     "Async Capable": false,
+                     "Join Type": "Inner",
+                     "Startup Cost": 3240.39,
+                     "Total Cost": 54661.37,
+                     "Plan Rows": 7727,
+                     "Plan Width": 29,
+                     "Disabled": false,
+                     "Inner Unique": false,
+                     "Hash Cond": "(t.id = cc.movie_id)",
+                     "Plans": [
+                      {
+                       "Node Type": "Seq Scan",
+                       "Parent Relationship": "Outer",
+                       "Parallel Aware": true,
+                       "Async Capable": false,
+                       "Relation Name": "title",
+                       "Alias": "t",
+                       "Startup Cost": 0.0,
+                       "Total Cost": 49174.79,
+                       "Plan Rows": 578378,
+                       "Plan Width": 25,
+                       "Disabled": false,
+                       "Filter": "(production_year > 2000)"
+                      },
+                      {
+                       "Node Type": "Hash",
+                       "Parent Relationship": "Inner",
+                       "Parallel Aware": false,
+                       "Async Capable": false,
+                       "Startup Cost": 2818.24,
+                       "Total Cost": 2818.24,
+                       "Plan Rows": 33772,
+                       "Plan Width": 4,
+                       "Disabled": false,
+                       "Plans": [
+                        {
+                         "Node Type": "Hash Join",
+                         "Parent Relationship": "Outer",
+                         "Parallel Aware": false,
+                         "Async Capable": false,
+                         "Join Type": "Inner",
+                         "Startup Cost": 1.06,
+                         "Total Cost": 2818.24,
+                         "Plan Rows": 33772,
+                         "Plan Width": 4,
+                         "Disabled": false,
+                         "Inner Unique": true,
+                         "Hash Cond": "(cc.status_id = cct1.id)",
+                         "Plans": [
+                          {
+                           "Node Type": "Seq Scan",
+                           "Parent Relationship": "Outer",
+                           "Parallel Aware": false,
+                           "Async Capable": false,
+                           "Relation Name": "complete_cast",
+                           "Alias": "cc",
+                           "Startup Cost": 0.0,
+                           "Total Cost": 2086.86,
+                           "Plan Rows": 135086,
+                           "Plan Width": 8,
+                           "Disabled": false
+                          },
+                          {
+                           "Node Type": "Hash",
+                           "Parent Relationship": "Inner",
+                           "Parallel Aware": false,
+                           "Async Capable": false,
+                           "Startup Cost": 1.05,
+                           "Total Cost": 1.05,
+                           "Plan Rows": 1,
+                           "Plan Width": 4,
+                           "Disabled": false,
+                           "Plans": [
+                            {
+                             "Node Type": "Seq Scan",
+                             "Parent Relationship": "Outer",
+                             "Parallel Aware": false,
+                             "Async Capable": false,
+                             "Relation Name": "comp_cast_type",
+                             "Alias": "cct1",
+                             "Startup Cost": 0.0,
+                             "Total Cost": 1.05,
+                             "Plan Rows": 1,
+                             "Plan Width": 4,
+                             "Disabled": false,
+                             "Filter": "((kind)::text = 'complete+verified'::text)"
+                            }
+                           ]
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     ]
+                    },
+                    {
+                     "Node Type": "Hash",
+                     "Parent Relationship": "Inner",
+                     "Parallel Aware": false,
+                     "Async Capable": false,
+                     "Startup Cost": 1.09,
+                     "Total Cost": 1.09,
+                     "Plan Rows": 1,
+                     "Plan Width": 14,
+                     "Disabled": false,
+                     "Plans": [
+                      {
+                       "Node Type": "Seq Scan",
+                       "Parent Relationship": "Outer",
+                       "Parallel Aware": false,
+                       "Async Capable": false,
+                       "Relation Name": "kind_type",
+                       "Alias": "kt",
+                       "Startup Cost": 0.0,
+                       "Total Cost": 1.09,
+                       "Plan Rows": 1,
+                       "Plan Width": 14,
+                       "Disabled": false,
+                       "Filter": "((kind)::text = 'movie'::text)"
+                      }
+                     ]
+                    }
+                   ]
+                  },
+                  {
+                   "Node Type": "Index Scan",
+                   "Parent Relationship": "Inner",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Scan Direction": "Forward",
+                   "Index Name": "movie_id_movie_info",
+                   "Relation Name": "movie_info",
+                   "Alias": "mi",
+                   "Startup Cost": 0.43,
+                   "Total Cost": 2.05,
+                   "Plan Rows": 1,
+                   "Plan Width": 8,
+                   "Disabled": false,
+                   "Index Cond": "(movie_id = t.id)",
+                   "Filter": "((note ~~ '%internet%'::text) AND ((info ~~ 'USA:% 199%'::text) OR (info ~~ 'USA:% 200%'::text)))"
+                  }
+                 ]
+                },
+                {
+                 "Node Type": "Memoize",
+                 "Parent Relationship": "Inner",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Startup Cost": 0.15,
+                 "Total Cost": 0.21,
+                 "Plan Rows": 1,
+                 "Plan Width": 4,
+                 "Disabled": false,
+                 "Cache Key": "mi.info_type_id",
+                 "Cache Mode": "logical",
+                 "Plans": [
+                  {
+                   "Node Type": "Index Scan",
+                   "Parent Relationship": "Outer",
+                   "Parallel Aware": false,
+                   "Async Capable": false,
+                   "Scan Direction": "Forward",
+                   "Index Name": "info_type_pkey",
+                   "Relation Name": "info_type",
+                   "Alias": "it1",
+                   "Startup Cost": 0.14,
+                   "Total Cost": 0.2,
+                   "Plan Rows": 1,
+                   "Plan Width": 4,
+                   "Disabled": false,
+                   "Index Cond": "(id = mi.info_type_id)",
+                   "Filter": "((info)::text = 'release dates'::text)"
+                  }
+                 ]
+                }
+               ]
+              }
+             ]
+            },
+            {
+             "Node Type": "Index Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Scan Direction": "Forward",
+             "Index Name": "movie_id_movie_keyword",
+             "Relation Name": "movie_keyword",
+             "Alias": "mk",
+             "Startup Cost": 0.43,
+             "Total Cost": 1.34,
+             "Plan Rows": 47,
+             "Plan Width": 8,
+             "Disabled": false,
+             "Index Cond": "(movie_id = t.id)"
+            }
+           ]
+          },
+          {
+           "Node Type": "Index Scan",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Scan Direction": "Forward",
+           "Index Name": "movie_id_movie_companies",
+           "Relation Name": "movie_companies",
+           "Alias": "mc",
+           "Startup Cost": 0.43,
+           "Total Cost": 0.54,
+           "Plan Rows": 5,
+           "Plan Width": 12,
+           "Disabled": false,
+           "Index Cond": "(movie_id = mk.movie_id)"
+          }
+         ]
+        },
+        {
+         "Node Type": "Index Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Scan Direction": "Forward",
+         "Index Name": "company_name_pkey",
+         "Relation Name": "company_name",
+         "Alias": "cn",
+         "Startup Cost": 0.42,
+         "Total Cost": 0.45,
+         "Plan Rows": 1,
+         "Plan Width": 4,
+         "Disabled": false,
+         "Index Cond": "(id = mc.company_id)",
+         "Filter": "((country_code)::text = '[us]'::text)"
+        }
+       ]
+      },
+      {
+       "Node Type": "Index Only Scan",
+       "Parent Relationship": "Inner",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Scan Direction": "Forward",
+       "Index Name": "company_type_pkey",
+       "Relation Name": "company_type",
+       "Alias": "ct",
+       "Startup Cost": 0.13,
+       "Total Cost": 0.15,
+       "Plan Rows": 1,
+       "Plan Width": 4,
+       "Disabled": false,
+       "Index Cond": "(id = mc.company_type_id)"
+      }
+     ]
+    },
+    {
+     "Node Type": "Index Only Scan",
+     "Parent Relationship": "Inner",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Scan Direction": "Forward",
+     "Index Name": "keyword_pkey",
+     "Relation Name": "keyword",
+     "Alias": "k",
+     "Startup Cost": 0.42,
+     "Total Cost": 0.44,
+     "Plan Rows": 1,
+     "Plan Width": 4,
+     "Disabled": false,
+     "Index Cond": "(id = mk.keyword_id)"
+    }
+   ]
+  }
+ ]
+}

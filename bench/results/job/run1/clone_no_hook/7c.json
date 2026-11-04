@@ -1,0 +1,236 @@
+{
+ "Node Type": "Aggregate",
+ "Strategy": "Plain",
+ "Partial Mode": "Simple",
+ "Parallel Aware": false,
+ "Async Capable": false,
+ "Startup Cost": 0.09,
+ "Total Cost": 0.1,
+ "Plan Rows": 1,
+ "Plan Width": 64,
+ "Disabled": false,
+ "Plans": [
+  {
+   "Node Type": "Nested Loop",
+   "Parent Relationship": "Outer",
+   "Parallel Aware": false,
+   "Async Capable": false,
+   "Join Type": "Inner",
+   "Startup Cost": 0.0,
+   "Total Cost": 0.09,
+   "Plan Rows": 1,
+   "Plan Width": 114,
+   "Disabled": false,
+   "Inner Unique": true,
+   "Join Filter": "(ci.movie_id = t.id)",
+   "Plans": [
+    {
+     "Node Type": "Nested Loop",
+     "Parent Relationship": "Outer",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Join Type": "Inner",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.07,
+     "Plan Rows": 1,
+     "Plan Width": 122,
+     "Disabled": false,
+     "Inner Unique": true,
+     "Join Filter": "(it.id = pi.info_type_id)",
+     "Plans": [
+      {
+       "Node Type": "Nested Loop",
+       "Parent Relationship": "Outer",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Join Type": "Inner",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.06,
+       "Plan Rows": 1,
+       "Plan Width": 126,
+       "Disabled": false,
+       "Inner Unique": false,
+       "Join Filter": "(n.id = pi.person_id)",
+       "Plans": [
+        {
+         "Node Type": "Nested Loop",
+         "Parent Relationship": "Outer",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Join Type": "Inner",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.05,
+         "Plan Rows": 1,
+         "Plan Width": 35,
+         "Disabled": false,
+         "Inner Unique": true,
+         "Join Filter": "(an.person_id = n.id)",
+         "Plans": [
+          {
+           "Node Type": "Nested Loop",
+           "Parent Relationship": "Outer",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Join Type": "Inner",
+           "Startup Cost": 0.0,
+           "Total Cost": 0.04,
+           "Plan Rows": 1,
+           "Plan Width": 16,
+           "Disabled": false,
+           "Inner Unique": true,
+           "Join Filter": "(lt.id = ml.link_type_id)",
+           "Plans": [
+            {
+             "Node Type": "Nested Loop",
+             "Parent Relationship": "Outer",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Join Type": "Inner",
+             "Startup Cost": 0.0,
+             "Total Cost": 0.03,
+             "Plan Rows": 1,
+             "Plan Width": 20,
+             "Disabled": false,
+             "Inner Unique": false,
+             "Join Filter": "(ci.movie_id = ml.linked_movie_id)",
+             "Plans": [
+              {
+               "Node Type": "Nested Loop",
+               "Parent Relationship": "Outer",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Join Type": "Inner",
+               "Startup Cost": 0.0,
+               "Total Cost": 0.01,
+               "Plan Rows": 1,
+               "Plan Width": 12,
+               "Disabled": false,
+               "Inner Unique": false,
+               "Join Filter": "(an.person_id = ci.person_id)",
+               "Plans": [
+                {
+                 "Node Type": "Seq Scan",
+                 "Parent Relationship": "Outer",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Relation Name": "aka_name",
+                 "Alias": "an",
+                 "Startup Cost": 0.0,
+                 "Total Cost": 0.0,
+                 "Plan Rows": 1,
+                 "Plan Width": 4,
+                 "Disabled": false,
+                 "Filter": "((name ~~ '%a%'::text) OR (name ~~ 'A%'::text))"
+                },
+                {
+                 "Node Type": "Seq Scan",
+                 "Parent Relationship": "Inner",
+                 "Parallel Aware": false,
+                 "Async Capable": false,
+                 "Relation Name": "cast_info",
+                 "Alias": "ci",
+                 "Startup Cost": 0.0,
+                 "Total Cost": 0.0,
+                 "Plan Rows": 1,
+                 "Plan Width": 8,
+                 "Disabled": false
+                }
+               ]
+              },
+              {
+               "Node Type": "Seq Scan",
+               "Parent Relationship": "Inner",
+               "Parallel Aware": false,
+               "Async Capable": false,
+               "Relation Name": "movie_link",
+               "Alias": "ml",
+               "Startup Cost": 0.0,
+               "Total Cost": 0.0,
+               "Plan Rows": 1,
+               "Plan Width": 8,
+               "Disabled": false
+              }
+             ]
+            },
+            {
+             "Node Type": "Seq Scan",
+             "Parent Relationship": "Inner",
+             "Parallel Aware": false,
+             "Async Capable": false,
+             "Relation Name": "link_type",
+             "Alias": "lt",
+             "Startup Cost": 0.0,
+             "Total Cost": 0.0,
+             "Plan Rows": 1,
+             "Plan Width": 4,
+             "Disabled": false,
+             "Filter": "((link)::text = ANY ('{references,\"referenced in\",features,\"featured in\"}'::text[]))"
+            }
+           ]
+          },
+          {
+           "Node Type": "Seq Scan",
+           "Parent Relationship": "Inner",
+           "Parallel Aware": false,
+           "Async Capable": false,
+           "Relation Name": "name",
+           "Alias": "n",
+           "Startup Cost": 0.0,
+           "Total Cost": 0.0,
+           "Plan Rows": 1,
+           "Plan Width": 19,
+           "Disabled": false,
+           "Filter": "(((name_pcode_cf)::text >= 'A'::text) AND ((name_pcode_cf)::text <= 'F'::text) AND (((gender)::text = 'm'::text) OR (((gender)::text = 'f'::text) AND (name ~~ 'A%'::text))))"
+          }
+         ]
+        },
+        {
+         "Node Type": "Seq Scan",
+         "Parent Relationship": "Inner",
+         "Parallel Aware": false,
+         "Async Capable": false,
+         "Relation Name": "person_info",
+         "Alias": "pi",
+         "Startup Cost": 0.0,
+         "Total Cost": 0.0,
+         "Plan Rows": 1,
+         "Plan Width": 107,
+         "Disabled": false,
+         "Filter": "(note IS NOT NULL)"
+        }
+       ]
+      },
+      {
+       "Node Type": "Seq Scan",
+       "Parent Relationship": "Inner",
+       "Parallel Aware": false,
+       "Async Capable": false,
+       "Relation Name": "info_type",
+       "Alias": "it",
+       "Startup Cost": 0.0,
+       "Total Cost": 0.0,
+       "Plan Rows": 1,
+       "Plan Width": 4,
+       "Disabled": false,
+       "Filter": "((info)::text = 'mini biography'::text)"
+      }
+     ]
+    },
+    {
+     "Node Type": "Seq Scan",
+     "Parent Relationship": "Inner",
+     "Parallel Aware": false,
+     "Async Capable": false,
+     "Relation Name": "title",
+     "Alias": "t",
+     "Startup Cost": 0.0,
+     "Total Cost": 0.0,
+     "Plan Rows": 1,
+     "Plan Width": 4,
+     "Disabled": false,
+     "Filter": "((production_year >= 1980) AND (production_year <= 2010))"
+    }
+   ]
+  }
+ ]
+}
