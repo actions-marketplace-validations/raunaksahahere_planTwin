@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/raunaksahahere/plantwin/internal/bundle"
 	"github.com/raunaksahahere/plantwin/internal/twin"
 )
@@ -60,6 +62,69 @@ func TestRedactionDoesNotLeakCommonValues(t *testing.T) {
 	if !leaked(kept, secret) {
 		t.Fatal("keep mode should contain the common value; the leak test would be vacuous otherwise")
 	}
+}
+
+// TestExportRoleWithDocumentedGrants runs the export as the least-privilege role from docs/privacy-and-redaction.md.
+// The export must succeed, and the role must be unable to read table rows.
+func TestExportRoleWithDocumentedGrants(t *testing.T) {
+	ctx := context.Background()
+	prod, err := twin.Start(ctx, "plantwin-grants-test", "plantwin-postgres:18")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer prod.Stop()
+
+	admin, err := prod.Connect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer admin.Close(ctx)
+	setup := `
+		CREATE TABLE accounts (id int PRIMARY KEY, email_domain text NOT NULL);
+		INSERT INTO accounts SELECT g, 'd' || (g % 20) || '.example' FROM generate_series(1, 20000) g;
+		ANALYZE accounts;
+		CREATE ROLE plantwin_export LOGIN PASSWORD 'export-only' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+		GRANT CONNECT ON DATABASE postgres TO plantwin_export;
+		GRANT USAGE ON SCHEMA public TO plantwin_export;
+		GRANT SELECT ON pg_statistic TO plantwin_export;`
+	if _, err := admin.Exec(ctx, setup); err != nil {
+		t.Fatal(err)
+	}
+
+	roleDSN := "postgres://plantwin_export:export-only@" + hostOf(prod.DSN) + "/postgres?sslmode=disable"
+	b, err := Run(ctx, Options{DSN: roleDSN, Default: bundle.Hash, Now: time.Now()})
+	if err != nil {
+		t.Fatalf("export with the documented role failed: %v", err)
+	}
+	found := false
+	for _, a := range b.Attributes {
+		if a.Table == "accounts" && a.Column == "email_domain" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("the export role should see statistics for accounts.email_domain")
+	}
+
+	roleConn, err := pgx.Connect(ctx, roleDSN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer roleConn.Close(ctx)
+	var n int
+	if err := roleConn.QueryRow(ctx, "SELECT count(*) FROM accounts").Scan(&n); err == nil {
+		t.Fatal("the export role must not be able to read table rows")
+	}
+}
+
+// hostOf returns host:port from a DSN produced by twin.Start.
+func hostOf(dsn string) string {
+	at := strings.LastIndex(dsn, "@")
+	rest := dsn[at+1:]
+	if slash := strings.Index(rest, "/"); slash >= 0 {
+		rest = rest[:slash]
+	}
+	return rest
 }
 
 func leaked(b *bundle.Bundle, value string) bool {

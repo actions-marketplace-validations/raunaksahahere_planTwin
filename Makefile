@@ -33,7 +33,7 @@ test-ext:
 test-integration: image
 	$(GORUN) 'go test -c -tags integration -buildvcs=false -o bin/demo.test ./internal/demo && go test -c -tags integration -buildvcs=false -o bin/export.test ./internal/export'
 	./bin/demo.test -test.v -test.run TestDemo
-	./bin/export.test -test.v -test.run TestRedaction
+	./bin/export.test -test.v -test.run 'TestRedaction|TestExportRole'
 
 demo: build
 	./bin/plantwin demo

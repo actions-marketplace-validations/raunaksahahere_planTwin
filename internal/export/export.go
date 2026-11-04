@@ -44,14 +44,16 @@ func Run(ctx context.Context, opts Options) (*bundle.Bundle, error) {
 	}
 	defer conn.Close(ctx)
 
+	// pg_read_all_stats does not cover pg_statistic (checked on PostgreSQL 18), so the export role needs
+	// SELECT on pg_statistic itself. See docs/privacy-and-redaction.md, section 'Export role'.
 	var canRead bool
-	if err := conn.QueryRow(ctx, `SELECT pg_has_role(current_user, 'pg_read_all_stats', 'MEMBER')`).Scan(&canRead); err != nil {
+	if err := conn.QueryRow(ctx, `SELECT has_table_privilege(current_user, 'pg_statistic', 'SELECT')`).Scan(&canRead); err != nil {
 		return nil, fmt.Errorf("checking privileges: %w", err)
 	}
 	if !canRead {
-		return nil, errs.New("The export role cannot read statistics for every table.",
-			"Grant the role pg_read_all_stats (see docs/privacy-and-redaction.md, section 'Export role').",
-			"role %s lacks pg_read_all_stats", "current_user")
+		return nil, errs.New("The export role cannot read the planner statistics catalog (pg_statistic).",
+			"As a superuser on the replica, run: GRANT SELECT ON pg_statistic TO <role>; (see docs/privacy-and-redaction.md, section 'Export role').",
+			"role lacks SELECT on pg_statistic")
 	}
 
 	b := bundle.NewBundle(opts.Now)
@@ -120,16 +122,33 @@ func readRelations(ctx context.Context, conn *pgx.Conn, b *bundle.Bundle) error 
 	return rows.Err()
 }
 
+// readAttributes reads pg_statistic directly. The pg_stats view is not usable by the export role: it also
+// requires SELECT on each table (has_column_privilege), and pg_read_all_stats does not bypass that filter.
+// pg_statistic itself is revoked from PUBLIC and readable with pg_read_all_stats. The CASE expressions below
+// are the ones PostgreSQL 18 uses for the pg_stats view (src/backend/catalog/system_views.sql), restricted to
+// the statistic kinds the bundle keeps: 1 = MCV, 2 = histogram, 3 = correlation. No table rows are read.
 func readAttributes(ctx context.Context, conn *pgx.Conn, b *bundle.Bundle, opts Options, salt []byte) error {
 	rows, err := conn.Query(ctx, `
-		SELECT s.schemaname, s.tablename, s.attname, format_type(a.atttypid, a.atttypmod),
-		       s.inherited, s.null_frac, s.avg_width, s.n_distinct,
-		       s.most_common_vals::text, s.most_common_freqs::text, s.histogram_bounds::text, s.correlation
-		FROM pg_stats s
-		JOIN pg_namespace n ON n.nspname = s.schemaname
-		JOIN pg_class c ON c.relnamespace = n.oid AND c.relname = s.tablename
-		JOIN pg_attribute a ON a.attrelid = c.oid AND a.attname = s.attname
-		WHERE s.schemaname NOT IN ('pg_catalog', 'information_schema')
+		SELECT n.nspname, c.relname, a.attname, format_type(a.atttypid, a.atttypmod),
+		       s.stainherit, s.stanullfrac, s.stawidth, s.stadistinct,
+		       (CASE WHEN s.stakind1 = 1 THEN s.stavalues1 WHEN s.stakind2 = 1 THEN s.stavalues2
+		             WHEN s.stakind3 = 1 THEN s.stavalues3 WHEN s.stakind4 = 1 THEN s.stavalues4
+		             WHEN s.stakind5 = 1 THEN s.stavalues5 END)::text,
+		       (CASE WHEN s.stakind1 = 1 THEN s.stanumbers1 WHEN s.stakind2 = 1 THEN s.stanumbers2
+		             WHEN s.stakind3 = 1 THEN s.stanumbers3 WHEN s.stakind4 = 1 THEN s.stanumbers4
+		             WHEN s.stakind5 = 1 THEN s.stanumbers5 END)::text,
+		       (CASE WHEN s.stakind1 = 2 THEN s.stavalues1 WHEN s.stakind2 = 2 THEN s.stavalues2
+		             WHEN s.stakind3 = 2 THEN s.stavalues3 WHEN s.stakind4 = 2 THEN s.stavalues4
+		             WHEN s.stakind5 = 2 THEN s.stavalues5 END)::text,
+		       (CASE WHEN s.stakind1 = 3 THEN s.stanumbers1[1] WHEN s.stakind2 = 3 THEN s.stanumbers2[1]
+		             WHEN s.stakind3 = 3 THEN s.stanumbers3[1] WHEN s.stakind4 = 3 THEN s.stanumbers4[1]
+		             WHEN s.stakind5 = 3 THEN s.stanumbers5[1] END)
+		FROM pg_statistic s
+		JOIN pg_class c ON c.oid = s.starelid
+		JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = s.staattnum
+		JOIN pg_namespace n ON n.oid = c.relnamespace
+		WHERE NOT a.attisdropped
+		  AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
 		ORDER BY 1, 2, 3, 5`)
 	if err != nil {
 		return err
