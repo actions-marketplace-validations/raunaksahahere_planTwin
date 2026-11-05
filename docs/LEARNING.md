@@ -226,5 +226,5 @@ Docker is driven through the `docker` command, so the Docker SDK is not linked (
 
 **25. What would you do differently next?**
 Build the held-out corpus first; measure redaction on a schema with sensitive categorical columns; run the workflows
-(actionlint, a real CI run) that are written but have not run; and decide the `hash` default with the measured cost in
+(a second, independent corpus; a real replica test) that are still missing; and decide the `hash` default with the measured cost in
 front of the team.
