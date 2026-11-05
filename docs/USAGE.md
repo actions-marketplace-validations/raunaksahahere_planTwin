@@ -36,7 +36,8 @@ integration, and troubleshooting. For the design, see [ARCHITECTURE.md](ARCHITEC
 
 ## 2. Installation
 
-PlanTwin is not yet published as a release. Build it from a clone of this repository.
+Released binaries are on the [releases page](https://github.com/raunaksahahere/planTwin/releases), with `checksums.txt` and
+its signature. To build from source, clone this repository.
 
 **Requirements**: Docker (running), Git, and `make`. Go is not required; the build uses a pinned `golang:1.24` container.
 
@@ -143,6 +144,10 @@ statistics it exported, the redaction applied, and any warnings. Examples of war
 
 PlanTwin never runs `ANALYZE` itself.
 
+The export session is read-only on the server and has a five-minute statement timeout and a five-second lock timeout.
+If the server does not apply read-only mode, the export refuses to run. Connect to the replica directly, not through a
+connection pooler that drops startup parameters.
+
 Use a different environment variable with `--dsn-env` if `PLANTWIN_DSN` is taken. Keep the DSN out of shell history and
 out of logs.
 
@@ -167,6 +172,7 @@ plantwin check --base main --head HEAD
 | `--bundle` | `bundle.path` | Use a different bundle for this run. |
 | `--parallel` | `4` | EXPLAIN connections per twin. |
 | `--keep` | off | Keep the twin containers after the run, for debugging. |
+| `--timeout` | `30m` | Stop the check if it has not finished in this time. Use a Go duration such as `10m`. |
 | `--verbose` | off | Show the underlying error for failures. |
 
 What happens, in order:
@@ -339,6 +345,8 @@ Rules for values:
 - `queries[].name` must be unique. Each query needs exactly one of `sql` or `file`.
 - `redaction.default` and every `redaction.columns` value must be a known mode.
 - `index_selectivity` must be greater than 0 and at most 1.
+- An unknown key is an error that names the line. A misspelled key such as `threshold:` for `thresholds:` stops the run;
+  it is not ignored.
 - `fail_on` controls which findings fail the check. `error` fails only on errors; `warning` (default) fails on errors and
   warnings; `info` fails on anything.
 
@@ -358,7 +366,7 @@ assets below are the ones PlanTwin itself uses; see [docs/ci-triage.md](ci-triag
 
 ### 10.2 GitHub Actions
 
-The Action is published at this repository's tags and listed on the [GitHub Marketplace](https://github.com/marketplace/actions/plantwin-check). Use `v0.1.2` or later (`v0.1.0` cannot install the CLI; see
+The Action is published at this repository's tags and listed on the [GitHub Marketplace](https://github.com/marketplace/actions/plantwin-check). Pin a released tag, for example `v1.0.0` once it is published. Do not use `v0.1.0`, which cannot install the CLI (see
 [STATUS](STATUS.md)). It downloads the release binary, verifies its checksum, and runs `plantwin check`. It does **not**
 provide the twin image, so the job must make `plantwin-postgres:18` available first. The published image is public:
 
@@ -381,7 +389,7 @@ jobs:
           docker pull ghcr.io/raunaksahahere/plantwin-postgres:18
           docker tag ghcr.io/raunaksahahere/plantwin-postgres:18 plantwin-postgres:18
       - name: Run PlanTwin
-        uses: raunaksahahere/planTwin@v0.1.2
+        uses: raunaksahahere/planTwin@v1.0.0
         with:
           base: origin/${{ github.base_ref }}
           head: HEAD
@@ -394,11 +402,12 @@ jobs:
 ```
 
 The Action's step fails when the check fails, so the job is red on a regression. The inputs are `version` (the release
-binary, default `v0.1.2`), `base`, `head`, `config`, `format` and `report`.
+binary, default `v1.0.0`), `base`, `head`, `config`, `format` and `report`.
 
-What is verified: the examples workflow runs this Action at `v0.1.2`, with the same input names, against a scratch
-repository it builds, with `base` set to the previous commit (`HEAD~1`). It asserts the planted regression
-([STATUS](STATUS.md)). What is not verified: the `origin/<branch>` form above, and a repository other than this one.
+What is verified: the examples workflow ran this Action at `v0.1.2` and `v0.1.3`, with the same input names, against a
+scratch repository it builds, with `base` set to the previous commit (`HEAD~1`). It asserts the planted regression
+([STATUS](STATUS.md)). What is not verified: the `origin/<branch>` form above, a repository other than this one, and
+`v1.0.0` until its release gates pass ([STATUS](STATUS.md)).
 
 ### 10.3 GitLab CI
 
@@ -456,6 +465,10 @@ Run `plantwin doctor` first. For the underlying error of any failure, add `--ver
 | `… is not a valid git ref.` | Ref is empty or starts with `-` | Use a branch, tag or commit |
 | `The PostgreSQL container did not become ready within 90 seconds.` | Container failed to start | `docker logs <container>` |
 | `plantwin.yaml was not found …` | Not in the repository root | Run `plantwin init`, or pass `--config` |
+| `plantwin.yaml is not valid, or contains a key PlanTwin does not recognise.` | Malformed YAML, or a misspelled key | Fix the line the parser names; compare key names with [section 9](#9-configuration-reference) |
+| `The export DSN cannot be parsed.` | The DSN is not a valid URL or key=value string | Use `postgres://user:password@host:port/dbname?sslmode=require`; keep the password in the environment |
+| `The export session is not read-only, so the export was refused.` | A pooler dropped startup parameters | Connect to the replica directly |
+| `The check did not finish within …` | The check ran past `--timeout` | Raise `--timeout`, or find the slow step with `--verbose` |
 | *estimated* on a finding you did not expect | The migration changed that table | Expected; check the table's definition in production |
 | `query_error` finding | The query no longer plans on head | Usually a type change; update the query or migration |
 | Report says *statistics object could not be restored* | Object changed in the migration | Expected for changed objects; check the note |
@@ -470,4 +483,4 @@ Run `plantwin doctor` first. For the underlying error of any failure, add `--ver
 - **Storage.** Twins are disposable. The schema cache in `.plantwin/cache/` is small; delete it at any time.
 - **Redaction review.** When a new sensitive column appears, add it to `redaction.columns` or confirm the default covers it.
   Re-run `plantwin doctor` after changing redaction.
-- **Upgrades.** A bundle records the PostgreSQL version it was exported from. The twin must be PostgreSQL 18 in v0.1.
+- **Upgrades.** A bundle records the PostgreSQL version it was exported from. The twin must be PostgreSQL 18 in every 1.x release.

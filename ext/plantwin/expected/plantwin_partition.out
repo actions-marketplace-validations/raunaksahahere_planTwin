@@ -1,0 +1,53 @@
+-- Partitions: the parent has no storage and is skipped; each child is sized from its own imported statistics.
+SET plantwin.ci_marker = 'ci:regress';
+LOAD 'plantwin';
+CREATE TABLE plantwin_p (id int, v int) PARTITION BY RANGE (id);
+CREATE TABLE plantwin_p1 PARTITION OF plantwin_p FOR VALUES FROM (0) TO (1000000);
+CREATE TABLE plantwin_p2 PARTITION OF plantwin_p FOR VALUES FROM (1000000) TO (2000000);
+CREATE INDEX plantwin_p_v ON plantwin_p (v);
+SELECT * FROM pg_catalog.pg_restore_relation_stats(
+    'version', '180006'::integer, 'schemaname', 'public', 'relname', 'plantwin_p1',
+    'relpages', '4480'::integer, 'reltuples', '1e+06'::real,
+    'relallvisible', '0'::integer, 'relallfrozen', '0'::integer);
+ pg_restore_relation_stats 
+---------------------------
+ t
+(1 row)
+
+SELECT * FROM pg_catalog.pg_restore_relation_stats(
+    'version', '180006'::integer, 'schemaname', 'public', 'relname', 'plantwin_p2',
+    'relpages', '4480'::integer, 'reltuples', '1e+06'::real,
+    'relallvisible', '0'::integer, 'relallfrozen', '0'::integer);
+ pg_restore_relation_stats 
+---------------------------
+ t
+(1 row)
+
+SET plantwin.enabled = off;
+EXPLAIN SELECT * FROM plantwin_p WHERE v = 7;
+                                  QUERY PLAN                                  
+------------------------------------------------------------------------------
+ Append  (cost=0.00..0.01 rows=2 width=8)
+   ->  Seq Scan on plantwin_p1 plantwin_p_1  (cost=0.00..0.00 rows=1 width=8)
+         Filter: (v = 7)
+   ->  Seq Scan on plantwin_p2 plantwin_p_2  (cost=0.00..0.00 rows=1 width=8)
+         Filter: (v = 7)
+(5 rows)
+
+SET plantwin.enabled = on;
+EXPLAIN SELECT * FROM plantwin_p WHERE v = 7;
+                                         QUERY PLAN                                          
+---------------------------------------------------------------------------------------------
+ Append  (cost=42.92..9637.77 rows=10000 width=8)
+   ->  Bitmap Heap Scan on plantwin_p1 plantwin_p_1  (cost=42.92..4793.88 rows=5000 width=8)
+         Recheck Cond: (v = 7)
+         ->  Bitmap Index Scan on plantwin_p1_v_idx  (cost=0.00..41.67 rows=5000 width=0)
+               Index Cond: (v = 7)
+   ->  Bitmap Heap Scan on plantwin_p2 plantwin_p_2  (cost=42.92..4793.88 rows=5000 width=8)
+         Recheck Cond: (v = 7)
+         ->  Bitmap Index Scan on plantwin_p2_v_idx  (cost=0.00..41.67 rows=5000 width=0)
+               Index Cond: (v = 7)
+(9 rows)
+
+SET plantwin.enabled = off;
+DROP TABLE plantwin_p;

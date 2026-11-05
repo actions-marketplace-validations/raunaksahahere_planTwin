@@ -2,7 +2,10 @@
 package config
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -74,6 +77,8 @@ func Defaults() Config {
 }
 
 // Load reads and validates a config file. Missing keys keep their defaults.
+// Unknown keys are an error: a misspelled key (for example `threshold:` for `thresholds:`) would otherwise be
+// ignored and the check would silently run with defaults.
 func Load(path string) (Config, error) {
 	cfg := Defaults()
 	data, err := os.ReadFile(path)
@@ -81,9 +86,16 @@ func Load(path string) (Config, error) {
 		return cfg, errs.New("plantwin.yaml was not found or cannot be read.",
 			"Run `plantwin init` in the repository root to create it.", "cannot read %s", path)
 	}
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return cfg, errs.New("plantwin.yaml is not valid YAML.",
-			"Check the indentation and quoting near the line the parser reports.", "cannot parse %s: %v", path, err)
+	dec := yaml.NewDecoder(bytes.NewReader(data))
+	dec.KnownFields(true)
+	if err := dec.Decode(&cfg); err != nil && !errors.Is(err, io.EOF) {
+		// The parser's message names the line and the key, so it is shown in the reason, not only with --verbose.
+		return cfg, &errs.User{
+			What: "plantwin.yaml is not valid, or contains a key PlanTwin does not recognise.",
+			Why:  strings.Join(strings.Fields(err.Error()), " "),
+			Fix:  "Fix the line named in the reason above. Check the indentation, quoting and the spelling of keys. `plantwin init` writes the expected layout.",
+			Err:  fmt.Errorf("cannot parse %s: %w", path, err),
+		}
 	}
 	return cfg, Validate(&cfg)
 }

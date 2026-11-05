@@ -4,9 +4,9 @@ author: PlanTwin contributors
 
 inputs:
   version:
-    description: PlanTwin release to install (a tag such as v0.1.0). The checksum is verified before use.
+    description: PlanTwin release to install (a tag such as v1.0.0). The checksum is verified before use.
     required: false
-    default: v0.1.0
+    default: v1.0.0
   base:
     description: Base git ref. Pass the pull request's base branch, for example origin/main.
     required: true
@@ -45,13 +45,25 @@ runs:
         PT_VERSION: ${{ inputs.version }}
       run: |
         set -euo pipefail
+        # Pick the build for this runner. Runners are amd64 or arm64; anything else has no build.
+        case "$(uname -m)" in
+          x86_64|amd64)   arch=amd64 ;;
+          aarch64|arm64)  arch=arm64 ;;
+          *) echo "PlanTwin has no Linux build for $(uname -m). Supported: x86_64, aarch64." >&2; exit 1 ;;
+        esac
+        asset="plantwin_linux_${arch}.tar.gz"
         base_url="https://github.com/${GITHUB_ACTION_REPOSITORY:-raunaksahahere/planTwin}/releases/download/${PT_VERSION}"
+        # Install outside the repository, so the tarball and checksum file are never left in the checkout.
+        install_dir="${RUNNER_TEMP}/plantwin-install"
+        rm -rf "$install_dir"
+        mkdir -p "$install_dir"
+        cd "$install_dir"
         # The file must keep the name the checksum file lists: sha256sum -c looks it up by name.
-        curl -fsSL -O "${base_url}/plantwin_linux_amd64.tar.gz"
+        curl -fsSL -O "${base_url}/${asset}"
         curl -fsSL -o checksums.txt "${base_url}/checksums.txt"
-        grep " plantwin_linux_amd64.tar.gz$" checksums.txt | sha256sum -c -
-        tar -xzf plantwin_linux_amd64.tar.gz plantwin
-        ./plantwin version
+        grep " ${asset}$" checksums.txt | sha256sum -c -
+        tar -xzf "${asset}" plantwin
+        "$install_dir/plantwin" version
 
     - name: Run the check
       shell: bash
@@ -63,7 +75,7 @@ runs:
         PT_REPORT: ${{ inputs.report }}
       run: |
         set +e
-        ./plantwin check --config "$PT_CONFIG" --base "$PT_BASE" --head "$PT_HEAD" --format "$PT_FORMAT" --out "$PT_REPORT"
+        "${RUNNER_TEMP}/plantwin-install/plantwin" check --config "$PT_CONFIG" --base "$PT_BASE" --head "$PT_HEAD" --format "$PT_FORMAT" --out "$PT_REPORT"
         status=$?
         if [ -f "$PT_REPORT" ] && [ "$PT_FORMAT" = "md" ]; then
           cat "$PT_REPORT" >> "$GITHUB_STEP_SUMMARY"

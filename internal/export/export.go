@@ -35,14 +35,43 @@ var settingNames = []string{
 }
 
 // Run exports a bundle. It returns a user error when the role lacks the privileges it needs.
+//
+// The session is read-only and bounded on the server, not only by convention: the export runs against production,
+// so it must never write, must not wait on production locks, and must not run unbounded.
 func Run(ctx context.Context, opts Options) (*bundle.Bundle, error) {
-	conn, err := pgx.Connect(ctx, opts.DSN)
+	cfg, err := pgx.ParseConfig(opts.DSN)
+	if err != nil {
+		// The parser's error can echo the DSN, which contains the password, so the details are left out.
+		return nil, errs.New("The export DSN cannot be parsed.",
+			"Use postgres://user:password@host:port/dbname?sslmode=require, or the key=value form. Keep the password in an environment variable.",
+			"DSN parse failed; details omitted because they can contain the password")
+	}
+	if cfg.Config.RuntimeParams == nil {
+		cfg.Config.RuntimeParams = map[string]string{}
+	}
+	cfg.Config.RuntimeParams["application_name"] = "plantwin-export"
+	cfg.Config.RuntimeParams["default_transaction_read_only"] = "on"
+	cfg.Config.RuntimeParams["statement_timeout"] = "300000" // milliseconds: five minutes
+	cfg.Config.RuntimeParams["lock_timeout"] = "5000"        // milliseconds: a production lock is never waited on for long
+
+	conn, err := pgx.ConnectConfig(ctx, cfg)
 	if err != nil {
 		return nil, errs.New("Cannot connect to the export database.",
 			"Check the DSN, the network route to the replica, and that the role has LOGIN.",
 			"connect failed: %v", err)
 	}
 	defer conn.Close(ctx)
+
+	// Startup parameters can be dropped by a connection pooler. Refuse rather than export without the guarantees.
+	var readOnly string
+	if err := conn.QueryRow(ctx, `SELECT current_setting('default_transaction_read_only')`).Scan(&readOnly); err != nil {
+		return nil, fmt.Errorf("checking the export session: %w", err)
+	}
+	if readOnly != "on" {
+		return nil, errs.New("The export session is not read-only, so the export was refused.",
+			"Connect to the replica directly, not through a connection pooler that drops startup parameters.",
+			"default_transaction_read_only is %q", readOnly)
+	}
 
 	// pg_read_all_stats does not cover pg_statistic (checked on PostgreSQL 18), so the export role needs
 	// SELECT on pg_statistic itself. See docs/privacy-and-redaction.md, section 'Export role'.

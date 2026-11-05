@@ -3,6 +3,36 @@
 All notable changes are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 PlanTwin follows semantic versioning from v0.1.0. The JSON report carries its own `schema_version`.
 
+## [1.0.0] - 2026-11-05
+
+First production release. From 1.0.0 the compatibility promise in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) applies:
+CLI flags, exit codes, configuration keys and the JSON report's `schema_version` 1 do not change incompatibly within 1.x.
+
+### Changed
+- `plantwin.yaml` with an unknown key is now an error that names the file and line. Before, a misspelled key such as
+  `threshold:` was ignored and the check ran with defaults. Check your file: every example and the `plantwin init`
+  template use only known keys.
+- The statistics export runs in a read-only session with a five-minute statement timeout and a five-second lock timeout.
+  It identifies itself as `plantwin-export` in `pg_stat_activity`. If the server does not apply read-only mode (for
+  example, a connection pooler drops startup parameters), the export refuses to run.
+- A DSN that cannot be parsed is reported without its details, because the parser's message can contain the password.
+- Release binaries are built for linux/amd64, linux/arm64, darwin/amd64 and darwin/arm64.
+- The GitHub Action's default `version` is `v1.0.0`.
+
+### Added
+- `plantwin check --timeout` (default 30 minutes). A check that does not finish in time stops with a clear message.
+- The GitHub Action detects an x86-64 or arm64 Linux runner and installs the matching binary.
+- The quickstart and the examples workflow run on Linux x86-64 and arm64.
+- An extension regression test for partitioned tables: each partition is sized from its own imported statistics, and
+  the partitioned parent adds no scan of its own.
+
+### Known limits
+These are unchanged from 0.1.x and are stated in [docs/limitations.md](docs/limitations.md):
+- Only PostgreSQL 18 is supported.
+- Extended statistics are reported but not restored.
+- Parameter-sensitive custom plans are not compared; parameterised queries use the generic plan.
+- Accuracy figures come from a synthetic corpus. PlanTwin is not measured on your workload until you run it on it.
+
 ## [0.1.3] - 2026-11-05
 
 ### Added

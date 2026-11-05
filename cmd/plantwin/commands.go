@@ -150,9 +150,15 @@ func cmdCheck(ctx context.Context, args []string) error {
 	bundlePath := fs.String("bundle", "", "stats bundle to use (default: bundle.path in the config)")
 	keep := fs.Bool("keep", false, "keep the twin containers after the run, for debugging")
 	parallel := fs.Int("parallel", 4, "parallel EXPLAIN connections per twin")
+	limit := fs.Duration("timeout", 30*time.Minute, "overall time limit for the check; when it is reached the run stops and its containers are removed")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	if *limit <= 0 {
+		return errs.New("--timeout must be a positive duration.", "For example --timeout 30m.", "timeout %s", *limit)
+	}
+	ctx, cancel := context.WithTimeout(ctx, *limit)
+	defer cancel()
 	absCfg, err := filepath.Abs(*cfgPath)
 	if err != nil {
 		return err
@@ -163,6 +169,11 @@ func cmdCheck(ctx context.Context, args []string) error {
 		KeepTwins: *keep, Parallel: *parallel, Verbose: verbose, ToolVersion: Version,
 	})
 	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			return errs.New(fmt.Sprintf("The check did not finish within %s.", *limit),
+				"Raise --timeout if the migrations or the query catalog are large. If the time goes to one migration, look for a step that waits forever.",
+				"deadline exceeded: %v", err)
+		}
 		return err
 	}
 	w := io.Writer(os.Stdout)

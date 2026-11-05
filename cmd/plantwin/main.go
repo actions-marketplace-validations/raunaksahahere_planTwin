@@ -13,8 +13,8 @@ import (
 	"github.com/raunaksahahere/plantwin/internal/errs"
 )
 
-// Version is set at build time with -ldflags "-X main.Version=...".
-var Version = "0.1.3"
+// Version is set at build time with -ldflags "-X main.Version=...". The release workflow sets it from the tag.
+var Version = "1.0.0"
 
 // Exit codes. Scripts can rely on them.
 const (
