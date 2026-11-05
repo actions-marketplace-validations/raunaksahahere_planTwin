@@ -3,6 +3,14 @@
 All notable changes are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 PlanTwin follows semantic versioning from v0.1.0. The JSON report carries its own `schema_version`.
 
+## [0.1.1] - 2026-11-05
+
+### Fixed
+- The GitHub Action could not install the CLI from a release: it saved the tarball under a different name from the one
+  `checksums.txt` lists, so the checksum check failed before any PlanTwin code ran. Found by the `examples` workflow
+  against `v0.1.0`. The release notes for `v0.1.0` carry the same warning. The CLI and the image are unchanged.
+- The examples workflow now references the Action at `v0.1.1`.
+
 ## [0.1.0] - 2026-11-05
 
 First release. PlanTwin is a pre-1.0 tool; the CLI flags, the configuration keys and the JSON report may still change

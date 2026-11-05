@@ -18,7 +18,7 @@ on:
       tag:
         description: Release tag to test
         required: true
-        default: v0.1.0
+        default: v0.1.1
 
 permissions:
   contents: read
@@ -80,10 +80,11 @@ jobs:
         run: |
           set -euo pipefail
           base="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}"
-          curl -fsSL -o plantwin.tar.gz "${base}/plantwin_linux_amd64.tar.gz"
+          # Keep the listed file name: sha256sum -c looks the file up by name.
+          curl -fsSL -O "${base}/plantwin_linux_amd64.tar.gz"
           curl -fsSL -o checksums.txt "${base}/checksums.txt"
           grep " plantwin_linux_amd64.tar.gz$" checksums.txt | sha256sum -c -
-          mkdir -p bin && tar -xzf plantwin.tar.gz -C bin plantwin
+          mkdir -p bin && tar -xzf plantwin_linux_amd64.tar.gz -C bin plantwin
           ./bin/plantwin version
 
       - name: "Build the example repository (two commits, base then head)"
@@ -171,7 +172,7 @@ jobs:
 
       - name: Run the published GitHub Action at the tag (expected to report the planted regression)
         id: plantwin
-        uses: raunaksahahere/planTwin@v0.1.0
+        uses: raunaksahahere/planTwin@v0.1.1
         continue-on-error: true
         with:
           version: ${{ inputs.tag }}
