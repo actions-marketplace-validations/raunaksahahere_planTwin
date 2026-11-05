@@ -20,8 +20,8 @@ working days.
 - **Bundle integrity.** Bundles are signed with ed25519. `check` and `doctor` refuse an unsigned or modified bundle.
 - **The planner extension in production.** The extension refuses to load without `plantwin.ci_marker`. A
   `shared_preload_libraries` entry stops the server from starting (tested). It is not preloaded in the image.
-- **Local twins.** Containers bind to `127.0.0.1` on a random port, and use a fixed password that exists only for the
-  life of the container.
+- **Local twins.** Containers bind to `127.0.0.1` on a random port, and use a random password generated for each container,
+  which is never printed and exists only for the life of that container.
 - **Secrets in logs.** The CLI does not print the export DSN. Errors show the underlying cause; `--verbose` adds
   detail from the database driver, which does not include passwords.
 
