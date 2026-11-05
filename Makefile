@@ -1,8 +1,12 @@
 # Developer commands. Go runs in the pinned golang image (ADR-0006), as the current user.
 GO_IMAGE ?= golang:1.24
 UID_GID := $(shell id -u):$(shell id -g)
-GORUN = docker run --rm --user $(UID_GID) -e HOME=/tmp -e GOCACHE=/tmp/gocache -e GOFLAGS=-mod=mod \
-        -v $(CURDIR):/src -w /src -v plantwin-gomod:/go/pkg/mod $(GO_IMAGE) sh -c
+# The module cache is a host directory owned by the current user. A named Docker volume is created root-owned and is
+# not writable by a non-root container user, which broke CI (see docs/ci-triage.md).
+GO_CACHE_DIR ?= $(HOME)/.cache/plantwin-go
+GORUN = mkdir -p $(GO_CACHE_DIR) && docker run --rm --user $(UID_GID) -e HOME=/tmp -e GOPATH=/tmp/go \
+        -e GOCACHE=/tmp/gocache -e GOFLAGS=-mod=mod \
+        -v $(CURDIR):/src -w /src -v $(GO_CACHE_DIR):/tmp/go $(GO_IMAGE) sh -c
 
 .PHONY: fmt vet test golden build image test-ext test-integration demo check
 
