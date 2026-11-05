@@ -346,7 +346,8 @@ Invalid configuration fails before any container starts, with the field named in
 
 ## 10. Continuous integration
 
-PlanTwin's CI assets are written but **have not been run** yet. Check them in your own pipeline before relying on them.
+PlanTwin's own CI runs on every pull request and on `main`, and the examples workflow tests the published release. The
+assets below are the ones PlanTwin itself uses; see [docs/ci-triage.md](ci-triage.md) for the failures that were fixed.
 
 ### 10.1 Requirements for a CI job
 
@@ -358,8 +359,8 @@ PlanTwin's CI assets are written but **have not been run** yet. Check them in yo
 ### 10.2 GitHub Actions
 
 `action.yml` is a composite action. It downloads a release binary, verifies its checksum, and runs `check`. The release
-asset layout is defined in `.github/workflows/release.yml`, which has not run, so the binary does not exist yet. Until a
-release is published, build the binary in the job instead.
+asset layout is defined in `.github/workflows/release.yml`. Until a release is published, build the binary in the job
+instead, as the example below does.
 
 ```yaml
 name: plantwin

@@ -27,19 +27,20 @@ first.
 
 ## Not done, and why
 
-7. **CI has not run.** The workflows (`ci.yml`, `release.yml`) and the Action are written. Running them needs a push,
-   and pushing was not allowed for this work. **Consequence:** the "CI green" gate is not met (`docs/STATUS.md`).
+7. **CI had not run in the first development pass.** Now resolved: CI ran on pull requests and `main`, its two failures were
+   fixed, and `main` is green ([docs/ci-triage.md](ci-triage.md)).
 
-8. **Multi-architecture image.** Only `linux/amd64` was built locally. The buildx multi-arch build is in `release.yml`
-   and has not run.
+8. **Multi-architecture image.** Only `linux/amd64` was built locally. The buildx multi-arch build is in `release.yml`;
+   it runs with the tagged release and is verified after the tag ([docs/STATUS.md](STATUS.md)).
 
-9. **Signed release.** cosign is not installed here. The keyless signing step is in `release.yml` and has not run.
+9. **Signed release.** cosign is not installed on the development machine. Keyless signing runs in `release.yml` on the
+   runner, and it is verified after the tag (`docs/STATUS.md`).
 
-10. **`actionlint` and a second linter.** Not installed. `go vet` and `gofmt` were run and are clean. Staticcheck or
-    golangci-lint would need downloaded code, which was not run outside a reviewed container.
+10. **Linters.** Now resolved: `actionlint 1.7.7` runs in its pinned container over the workflows, and `staticcheck 2025.1.1`
+    runs in `make check`. Both are clean. Other linters (for example golangci-lint) have not been run.
 
-11. **Django example.** Django is not installed. The example is written against Django's migration format and is marked
-    as not executed in its README.
+11. **Django example.** Django is not installed on the development machine. The `examples` workflow installs it on the runner
+    and runs the example against the tagged release; the result is recorded in `docs/STATUS.md` once the job has run.
 
 12. **Real replica for `plantwin export` and `doctor`.** Export is tested against a container that plays the replica,
     including the least-privilege role. A real replica's version, extensions and size were not available.
