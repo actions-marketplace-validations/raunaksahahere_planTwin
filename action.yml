@@ -41,11 +41,12 @@ runs:
         PT_VERSION: ${{ inputs.version }}
       run: |
         set -euo pipefail
-        base_url="https://github.com/${GITHUB_ACTION_REPOSITORY:-raunaksahahere/plantwin}/releases/download/${PT_VERSION}"
-        curl -fsSL -o plantwin.tar.gz "${base_url}/plantwin_linux_amd64.tar.gz"
+        base_url="https://github.com/${GITHUB_ACTION_REPOSITORY:-raunaksahahere/planTwin}/releases/download/${PT_VERSION}"
+        # The file must keep the name the checksum file lists: sha256sum -c looks it up by name.
+        curl -fsSL -O "${base_url}/plantwin_linux_amd64.tar.gz"
         curl -fsSL -o checksums.txt "${base_url}/checksums.txt"
         grep " plantwin_linux_amd64.tar.gz$" checksums.txt | sha256sum -c -
-        tar -xzf plantwin.tar.gz plantwin
+        tar -xzf plantwin_linux_amd64.tar.gz plantwin
         ./plantwin version
 
     - name: Run the check
