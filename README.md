@@ -68,7 +68,7 @@ make build            # build bin/plantwin
 ./bin/plantwin demo   # synthetic production, a migration that drops an index, and the report
 ```
 
-The demo creates its own repository, database and signing key in a temporary directory, and removes them afterwards. A fresh clone reached a first report in about 94 seconds on the development machine ([docs/quickstart-verification.md](docs/quickstart-verification.md)).
+The demo creates its own repository, database and signing key in a temporary directory, and removes them afterwards. On a clean GitHub-hosted runner, the same commands produce a first report in 65 seconds; the timings and run are in [docs/quickstart-verification.md](docs/quickstart-verification.md).
 
 To use PlanTwin on your own repository, see [docs/USAGE.md](docs/USAGE.md). In short:
 

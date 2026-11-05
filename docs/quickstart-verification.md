@@ -2,7 +2,30 @@
 
 **Requirement.** A stranger with Docker reaches a first report from the README alone, in under ten minutes.
 
-**What was run.** The three quickstart commands from `README.md`, in a **fresh clone** of the repository at commit
+## 1. Clean GitHub-hosted runner (verified by CI)
+
+The `quickstart` job in `.github/workflows/ci.yml` runs on a fresh `ubuntu-24.04` runner, from a fresh checkout of the
+commit. It runs the README's commands in order and times each one. It fails unless the report contains the planted
+`lost_index` finding.
+
+Run [41969273883](https://github.com/raunaksahahere/planTwin/actions/runs/41969273883) (pull request #1, branch
+`ci/fix-runner-failures`), artifact `quickstart`:
+
+| Step | Command (from README) | Time on the runner |
+|---|---|---:|
+| 1 | `make image` (builds `plantwin-postgres:18` from scratch, including the base image pull) | 30 s |
+| 2 | `make build` | 27 s |
+| 3 | `./bin/plantwin demo` | 8 s |
+| | **Total** | **65 s** |
+
+The first report contains the planted finding (`lost_index`, estimated, on `orders`). The runner has no build cache from
+earlier runs, so the image build is a genuine cold build.
+
+The same job also passed on `main` at commit `14357f1` (run [41970568830](https://github.com/raunaksahahere/planTwin/actions/runs/41970568830)).
+
+## 2. Development machine (earlier record, for comparison)
+
+**What was run (development machine).** The three quickstart commands from `README.md`, in a **fresh clone** of the repository at commit
 `4913f8b`, in a new directory. Nothing was copied from the working tree. The clone was built as follows.
 
 | Step | Command (from README) | Time | Result |
@@ -10,7 +33,7 @@
 | 1 | `git clone` of the committed repository | < 1 s | clean clone |
 | 2 | `make image` | 72 s | image built from the clone's Dockerfile (build cache pruned first) |
 | 3 | `make build` | 13 s | `bin/plantwin` built in the pinned golang container |
-| 4 | `./bin/plantwin demo` | 9 s | report produced, exit code 1 (the demo migration is flagged, as designed) |
+| 4 | `./bin/plantwin demo` | 9 s | report produced, exit code 0 (the demo migration is flagged in the report, as designed) |
 | | **Total** | **about 94 s** | |
 
 **Conditions, stated plainly.**

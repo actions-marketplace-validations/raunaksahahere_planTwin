@@ -8,6 +8,8 @@ package export
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -79,11 +81,15 @@ func TestExportRoleWithDocumentedGrants(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer admin.Close(ctx)
+	rolePW, err := randomSecret()
+	if err != nil {
+		t.Fatal(err)
+	}
 	setup := `
 		CREATE TABLE accounts (id int PRIMARY KEY, email_domain text NOT NULL);
 		INSERT INTO accounts SELECT g, 'd' || (g % 20) || '.example' FROM generate_series(1, 20000) g;
 		ANALYZE accounts;
-		CREATE ROLE plantwin_export LOGIN PASSWORD 'export-only' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+		CREATE ROLE plantwin_export LOGIN PASSWORD '` + rolePW + `' NOSUPERUSER NOCREATEDB NOCREATEROLE;
 		GRANT CONNECT ON DATABASE postgres TO plantwin_export;
 		GRANT USAGE ON SCHEMA public TO plantwin_export;
 		GRANT SELECT ON pg_statistic TO plantwin_export;`
@@ -91,7 +97,7 @@ func TestExportRoleWithDocumentedGrants(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	roleDSN := "postgres://plantwin_export:export-only@" + hostOf(prod.DSN) + "/postgres?sslmode=disable"
+	roleDSN := "postgres://plantwin_export:" + rolePW + "@" + hostOf(prod.DSN) + "/postgres?sslmode=disable"
 	b, err := Run(ctx, Options{DSN: roleDSN, Default: bundle.Hash, Now: time.Now()})
 	if err != nil {
 		t.Fatalf("export with the documented role failed: %v", err)
@@ -125,6 +131,15 @@ func hostOf(dsn string) string {
 		rest = rest[:slash]
 	}
 	return rest
+}
+
+// randomSecret returns a fresh random value for a test role, so no credential is stored in the repository.
+func randomSecret() (string, error) {
+	b := make([]byte, 24)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }
 
 func leaked(b *bundle.Bundle, value string) bool {

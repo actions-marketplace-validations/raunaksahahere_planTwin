@@ -48,6 +48,16 @@ to get green.
 10. **Release notes come from the CHANGELOG.** The release job extracts the section for the tag and fails if there is
     none. The CHANGELOG is therefore part of the release gate.
 
+11. **No credentials in code or fixtures.** Twin containers get a random password per container, and the containers no
+    longer use `trust` authentication. The least-privilege test role's password is generated per run. The Django
+    example reads `SECRET_KEY` from the environment and generates one otherwise.
+
+**Deliberate exception to pinning.** The `examples` workflow references this project's own Action at its tag
+(`raunaksahahere/planTwin@v0.1.0`), not at a commit SHA. That is the reference consumers use, and testing it is the point
+of the job. The tag is the only mutable reference in the workflows and is checked by hand at release time. Container
+images in the Makefile and workflows are referenced by tag, not digest; the release pins the published image by digest
+when it signs it.
+
 **Consequences.**
 
 - The `examples` workflow names the Action at a literal tag (`raunaksahahere/planTwin@v0.1.0`), because GitHub does not

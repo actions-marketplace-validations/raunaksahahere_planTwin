@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -46,8 +47,13 @@ func RequireDocker(ctx context.Context) error {
 // Start runs a container from image, waits until PostgreSQL accepts connections, and returns the twin.
 func Start(ctx context.Context, name, image string) (*Twin, error) {
 	_ = exec.CommandContext(ctx, "docker", "rm", "-f", name).Run()
+	// A fresh random password per container. It exists only for the life of the container and is never printed.
+	pw, err := randomPassword()
+	if err != nil {
+		return nil, err
+	}
 	out, err := exec.CommandContext(ctx, "docker", "run", "-d", "--name", name,
-		"-e", "POSTGRES_PASSWORD=plantwin", "-e", "POSTGRES_HOST_AUTH_METHOD=trust",
+		"-e", "POSTGRES_PASSWORD="+pw,
 		"-p", "127.0.0.1::5432", image, "-c", "autovacuum=off").CombinedOutput()
 	if err != nil {
 		return nil, errs.New(fmt.Sprintf("Could not start the PostgreSQL container from image %q.", image),
@@ -58,7 +64,7 @@ func Start(ctx context.Context, name, image string) (*Twin, error) {
 	if err != nil {
 		return nil, err
 	}
-	dsn := fmt.Sprintf("postgres://postgres:plantwin@127.0.0.1:%s/postgres?sslmode=disable", port)
+	dsn := fmt.Sprintf("postgres://postgres:%s@127.0.0.1:%s/postgres?sslmode=disable", pw, port)
 	t := &Twin{Name: name, DSN: dsn, Image: image}
 	if err := t.waitReady(ctx); err != nil {
 		return nil, err
@@ -69,6 +75,15 @@ func Start(ctx context.Context, name, image string) (*Twin, error) {
 // Stop removes the container.
 func (t *Twin) Stop() {
 	_ = exec.Command("docker", "rm", "-f", t.Name).Run()
+}
+
+// randomPassword returns 24 random bytes, hex encoded.
+func randomPassword() (string, error) {
+	b := make([]byte, 24)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }
 
 func hostPort(ctx context.Context, name string) (string, error) {
