@@ -1,0 +1,13 @@
+-- Synthetic production data for the demo. Deterministic: setseed fixes the random sequence.
+SELECT setseed(0.7);
+INSERT INTO customers
+SELECT g, 'name' || g, (ARRAY['EU','US','APAC'])[1 + floor(random() * 3)::int]
+FROM generate_series(1, 20000) g;
+INSERT INTO orders
+SELECT g,
+       1 + floor(power(random(), 3) * 20000)::int,
+       CASE WHEN random() < 0.05 THEN 'open' WHEN random() < 0.9 THEN 'closed' ELSE 'returned' END,
+       TIMESTAMP '2024-01-01' + random() * INTERVAL '900 days',
+       round((random() * 500)::numeric, 2)
+FROM generate_series(1, 500000) g;
+ANALYZE;

@@ -1,0 +1,191 @@
+# Examples: verifies the published release from the outside.
+#
+# What it proves, for each example (plain SQL and Django):
+#   1. the published twin image pulls, and its keyless signature verifies for the release workflow at the tag;
+#   2. the released CLI binary downloads, its checksum verifies, and it runs;
+#   3. statistics export works with the documented least-privilege role, and the bundle is signed;
+#   4. the published GitHub Action, referenced at the tag, runs the check and reports the planted regression.
+#
+# The Action step uses continue-on-error because the planted migration is meant to fail the check. The next step
+# asserts that exact outcome and that the report names the planted lost_index finding. Any other result fails the job.
+#
+# When a new release is cut, bump the tag in `uses:` and the default of `tag` together.
+name: examples
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to test
+        required: true
+        default: v0.1.0
+
+permissions:
+  contents: read
+
+jobs:
+  example:
+    name: Example ${{ matrix.example }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: read     # pull the published image (private or public)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - example: sql-migrations
+            head_only: migrations/0002_drop_customer_index.sql
+          - example: django
+            head_only: shop/migrations/0002_remove_customer_index.py
+    env:
+      TAG: ${{ inputs.tag }}
+      OWNER: ${{ github.repository_owner }}
+      EX: ${{ matrix.example }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        if: matrix.example == 'django'
+        with:
+          python-version: "3.12"
+
+      - name: Install Django for the Django example (on this runner, as the migration command needs it)
+        if: matrix.example == 'django'
+        run: python -m pip install --quiet "Django>=5.1,<5.2" "psycopg[binary]>=3.2,<4"
+
+      - uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
+
+      - name: Pull the published twin image and verify its signature
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          image="ghcr.io/${OWNER}/plantwin-postgres"
+          docker pull "${image}:18"
+          digest_ref="$(docker inspect --format '{{index .RepoDigests 0}}' "${image}:18")"
+          echo "pulled ${digest_ref}"
+          cosign verify "$digest_ref" \
+            --certificate-identity "https://github.com/${GITHUB_REPOSITORY}/.github/workflows/release.yml@refs/tags/${TAG}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" > cosign-verify.json
+          echo "signature verified"
+          docker tag "${image}:18" plantwin-postgres:18
+
+      - name: Download the released CLI and verify its checksum
+        run: |
+          set -euo pipefail
+          base="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}"
+          curl -fsSL -o plantwin.tar.gz "${base}/plantwin_linux_amd64.tar.gz"
+          curl -fsSL -o checksums.txt "${base}/checksums.txt"
+          grep " plantwin_linux_amd64.tar.gz$" checksums.txt | sha256sum -c -
+          mkdir -p bin && tar -xzf plantwin.tar.gz -C bin plantwin
+          ./bin/plantwin version
+
+      - name: "Build the example repository (two commits, base then head)"
+        run: |
+          set -euo pipefail
+          dst="${RUNNER_TEMP}/demo-${EX}"
+          rm -rf "$dst" && mkdir -p "$dst"
+          cp -r "examples/${EX}/." "$dst/"
+          rm -f "$dst/prod_seed.sql" "$dst/README.md"
+          rm -f "$dst/${{ matrix.head_only }}"
+          cd "$dst"
+          git init -q -b main
+          git config user.name plantwin-ci
+          git config user.email ci@plantwin.invalid
+          git add .
+          git commit -q -m "base revision"
+          cp "$GITHUB_WORKSPACE/examples/${EX}/${{ matrix.head_only }}" "$dst/${{ matrix.head_only }}"
+          git add .
+          git commit -q -m "head revision: drop the customer index"
+          git log --oneline
+
+      - name: Start a synthetic production database (postgres:18, official image)
+        run: |
+          set -euo pipefail
+          pw="$(openssl rand -hex 24)"
+          echo "::add-mask::$pw"
+          echo "PGPASS=$pw" >> "$GITHUB_ENV"
+          docker run -d --name "prod-${EX}" -e POSTGRES_DB=app -e POSTGRES_PASSWORD="$pw" \
+            -p 127.0.0.1::5432 postgres:18.6 > /dev/null
+          for _ in $(seq 1 60); do
+            docker exec "prod-${EX}" pg_isready -U postgres -d app >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec "prod-${EX}" pg_isready -U postgres -d app
+          port="$(docker port "prod-${EX}" 5432/tcp | head -1 | sed 's/.*://')"
+          echo "PROD_PORT=$port" >> "$GITHUB_ENV"
+
+      - name: Apply the base migration and seed production data
+        run: |
+          set -euo pipefail
+          dst="${RUNNER_TEMP}/demo-${EX}"
+          if [ "$EX" = "sql-migrations" ]; then
+            docker exec -i "prod-${EX}" psql -U postgres -d app -v ON_ERROR_STOP=1 < "$dst/migrations/0001_schema.sql"
+          else
+            (cd "$dst" && DATABASE_URL="postgres://postgres:${PGPASS}@127.0.0.1:${PROD_PORT}/app?sslmode=disable" \
+              python manage.py migrate shop 0001)
+          fi
+          docker exec -i "prod-${EX}" psql -U postgres -d app -v ON_ERROR_STOP=1 < "examples/${EX}/prod_seed.sql"
+          echo "seeded"
+
+      - name: Create the documented least-privilege export role
+        run: |
+          set -euo pipefail
+          rolepw="$(openssl rand -hex 24)"
+          echo "::add-mask::$rolepw"
+          echo "ROLE_PASS=$rolepw" >> "$GITHUB_ENV"
+          docker exec -i "prod-${EX}" psql -U postgres -d app -v ON_ERROR_STOP=1 <<SQL
+          CREATE ROLE plantwin_export LOGIN PASSWORD '${rolepw}' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+          GRANT CONNECT ON DATABASE app TO plantwin_export;
+          GRANT USAGE ON SCHEMA public TO plantwin_export;
+          GRANT SELECT ON pg_statistic TO plantwin_export;
+          SQL
+          # The role must be refused table rows: this is the least-privilege property being verified.
+          if [ "$EX" = "sql-migrations" ]; then table=orders; else table=shop_order; fi
+          if docker exec -e PGPASSWORD="$rolepw" "prod-${EX}" psql -h 127.0.0.1 -U plantwin_export -d app \
+               -tAc "SELECT count(*) FROM ${table}" >/dev/null 2>&1; then
+            echo "export role can read table ${table}: refusing to continue" >&2
+            exit 1
+          fi
+          echo "export role cannot read table rows"
+
+      - name: Generate a signing key (outside the repository), export and sign the bundle
+        run: |
+          set -euo pipefail
+          dst="${RUNNER_TEMP}/demo-${EX}"
+          export PLANTWIN_DSN="postgres://plantwin_export:${ROLE_PASS}@127.0.0.1:${PROD_PORT}/app?sslmode=disable"
+          ./bin/plantwin keygen --priv "${RUNNER_TEMP}/plantwin.key" --pub "$dst/plantwin.pub"
+          ./bin/plantwin export --config "$dst/plantwin.yaml" --sign-key "${RUNNER_TEMP}/plantwin.key" \
+            --out "$dst/plantwin-bundle.json"
+          test -s "$dst/plantwin-bundle.json.sig"
+
+      - name: Stop the production database
+        if: always()
+        run: docker rm -f "prod-${EX}" >/dev/null 2>&1 || true
+
+      - name: Run the published GitHub Action at the tag (expected to report the planted regression)
+        id: plantwin
+        uses: raunaksahahere/planTwin@v0.1.0
+        continue-on-error: true
+        with:
+          version: ${{ inputs.tag }}
+          base: HEAD~1
+          head: HEAD
+          config: ${{ runner.temp }}/demo-${{ matrix.example }}/plantwin.yaml
+          format: md
+          report: plantwin-report-${{ matrix.example }}.md
+
+      - name: Assert the expected outcome
+        run: |
+          set -euo pipefail
+          # The planted migration must fail the check, and the report must name the planted finding.
+          test "${{ steps.plantwin.outcome }}" = "failure" || { echo "expected the check to fail on the planted regression; outcome was '${{ steps.plantwin.outcome }}'" >&2; exit 1; }
+          grep -q 'lost_index' "plantwin-report-${{ matrix.example }}.md"
+          echo "planted lost_index regression reported; expected failure confirmed"
+          cat "plantwin-report-${{ matrix.example }}.md" >> "$GITHUB_STEP_SUMMARY"
