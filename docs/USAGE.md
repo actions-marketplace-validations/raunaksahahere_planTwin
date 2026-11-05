@@ -358,9 +358,9 @@ assets below are the ones PlanTwin itself uses; see [docs/ci-triage.md](ci-triag
 
 ### 10.2 GitHub Actions
 
-`action.yml` is a composite action. It downloads a release binary, verifies its checksum, and runs `check`. The release
-asset layout is defined in `.github/workflows/release.yml`. Until a release is published, build the binary in the job
-instead, as the example below does.
+The Action is published at this repository's tags. Use `v0.1.2` or later (`v0.1.0` cannot install the CLI; see
+[STATUS](STATUS.md)). It downloads the release binary, verifies its checksum, and runs `plantwin check`. It does **not**
+provide the twin image, so the job must make `plantwin-postgres:18` available first. The published image is public:
 
 ```yaml
 name: plantwin
@@ -374,21 +374,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0                   # needed to resolve the base ref
+          fetch-depth: 0                   # needed to resolve the base branch
           persist-credentials: false
-      - name: Build the twin image and the CLI
-        run: make image && make build
+      - name: Provide the twin image (published, signed)
+        run: |
+          docker pull ghcr.io/raunaksahahere/plantwin-postgres:18
+          docker tag ghcr.io/raunaksahahere/plantwin-postgres:18 plantwin-postgres:18
       - name: Run PlanTwin
-        run: ./bin/plantwin check --base origin/${{ github.base_ref }} --head HEAD --format md --out plantwin-report.md
+        uses: raunaksahahere/planTwin@v0.1.2
+        with:
+          base: origin/${{ github.base_ref }}
+          head: HEAD
+          config: plantwin.yaml
+          format: md
+          report: plantwin-report.md
       - name: Show the report
         if: always()
         run: cat plantwin-report.md >> "$GITHUB_STEP_SUMMARY"
 ```
 
-When a release exists, replace the build steps with `uses: ./` (or the published action reference) and its inputs
-`base`, `head`, `config`, `format`, `report`, and `version`.
+The Action's step fails when the check fails, so the job is red on a regression. The inputs are `version` (the release
+binary, default `v0.1.2`), `base`, `head`, `config`, `format` and `report`.
+
+What is verified: the examples workflow runs this Action at `v0.1.2`, with the same input names, against a scratch
+repository it builds, with `base` set to the previous commit (`HEAD~1`). It asserts the planted regression
+([STATUS](STATUS.md)). What is not verified: the `origin/<branch>` form above, and a repository other than this one.
 
 ### 10.3 GitLab CI
+
+**Not run, and it needs a change before use.** The template downloads the CLI from a GitLab generic package registry, and
+this project publishes releases only to GitHub. Mirror the release files to a registry you control, and set
+`PLANTWIN_PROJECT_ID` to that location, before the template can run.
 
 `action/gitlab-ci.yml` is a template for merge-request pipelines. It needs:
 

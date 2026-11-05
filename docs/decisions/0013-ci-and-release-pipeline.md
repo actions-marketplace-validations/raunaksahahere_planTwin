@@ -58,6 +58,12 @@ of the job. The tag is the only mutable reference in the workflows and is checke
 images in the Makefile and workflows are referenced by tag, not digest; the release pins the published image by digest
 when it signs it.
 
+**Observed outcome.** The first release (`v0.1.0`) passed its own workflow and failed when the examples used it from
+outside. Two defects were in released code: the Action's install step, and a command migration tool that ran in the
+wrong directory (see [ci-triage](../ci-triage.md), R1 and R2). Both were fixed as patch releases, and the tags were not
+moved. The examples workflow is the reason these were found. Decision 7 is therefore the part of this design that
+earned its cost.
+
 **Consequences.**
 
 - The `examples` workflow names the Action at a literal tag (`raunaksahahere/planTwin@v0.1.0`), because GitHub does not

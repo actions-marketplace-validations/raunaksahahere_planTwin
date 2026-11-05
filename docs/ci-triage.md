@@ -39,13 +39,33 @@ workflows against the same root causes as failure 1. Each would have failed or w
 | L7 | `staticcheck` (not run in CI before) | Unused functions `relationRows`, `hasIndex`, `indexName` left over from the rule refactor; `removeAll` used only by an integration-tagged test. | Dead code, and a lint gate the project claimed but did not run. | Dead code removed; integration test calls `os.RemoveAll` directly; `staticcheck@2025.1.1` runs in `make check`. |
 | L8 | `ci.yml` | No job followed the README quickstart on a clean runner. | The 10-minute rule was only measured on the development machine. | Added `quickstart` job: README commands, timed, and the report must contain the planted `lost_index` finding. |
 
+## Found by the release and the examples (fixed forward)
+
+These were not visible on `main`. The release workflow passed, and the problems appeared only when the published
+artifacts were used from outside, which is what the `examples` workflow does. None was fixed by moving a tag. Each fix
+was released as the next patch version.
+
+| # | Found by | Problem | Root cause | Fix | Release |
+|---|---|---|---|---|---|
+| R1 | examples, SQL and Django, run [41973503679](https://github.com/raunaksahahere/planTwin/actions/runs/41973503679) against `v0.1.0` | The Action failed before PlanTwin started: `sha256sum: plantwin_linux_amd64.tar.gz: No such file or directory`. | The install step saved the tarball as `plantwin.tar.gz`, but `checksums.txt` lists `plantwin_linux_amd64.tar.gz`. `sha256sum -c` looks files up by name. Found because the Action had never been run from outside. | Keep the listed file name in both `action.yml` and the examples job. The install step was reproduced locally against the published `v0.1.0` assets before the fix. | `v0.1.1` (commit `4ae4b25`). The `v0.1.0` release notes now carry a known-issue note. |
+| R2 | examples, Django, run [41976074760](https://github.com/raunaksahahere/planTwin/actions/runs/41976074760) against `v0.1.1` | `The migration command failed on the twin.` (the cause was not shown). | `migrationDir` joined `migrations.path` onto the revision for every tool. A command tool (`python manage.py migrate`) ran in a directory that a Django project does not have. The failure also hid the command's output unless `--verbose` was given. | A command tool runs from the revision root; a plain-SQL tool still reads `migrations.path`. A unit test covers both. The last lines of the command's output are now in the error. | `v0.1.2` (commit `5c68343`). |
+| R3 | examples, Django, after R2 | The Action succeeded, so the planted regression was not reported. | Not a PlanTwin fault. Django creates its own index for every `ForeignKey`. Dropping the custom `orders_customer_idx` left an equivalent index on `customer_id`, so the example did not regress and PlanTwin correctly reported nothing. | The example's foreign key sets `db_index=False`, so the custom index is the only index on that column. Reproduced locally: the check reports `lost_index` on `shop_order`. | Example change only (no release needed). Merged in `examples: Django foreign key …`. |
+
+Two latent problems were found while working on the release, and fixed in the same change:
+
+| # | Where | Problem | Fix |
+|---|---|---|---|
+| L9 | `examples.yml`, the production database start | A socket readiness check (`pg_isready` over the Unix socket) can succeed while the image's initialisation server is still running and not yet listening on TCP. A migration that connects over TCP then fails. | Readiness is checked over TCP inside the container. |
+| L10 | `Makefile`, `make build` | The version was hardcoded as `0.1.0` on the link line, so a development build reported a different version from the source. | Removed. The version comes from `cmd/plantwin/main.go`, which the release build sets explicitly. |
+
 ## Not reproduced locally
 
 - **Runner-only behaviour.** The permission failure in #1 happens only because the runner's UID differs from the
   development machine's. It was reproduced by reading the log, not by running the job, and it was confirmed by the fix:
   the same job passed on the runner after the change.
 - **`act`** (running Actions locally) is not installed. Running the workflows locally was not done.
-- **Multi-architecture build** (`linux/arm64` under QEMU) has not been run on any runner yet. See `docs/STATUS.md`.
+- **Multi-architecture build.** The release built `linux/amd64` and `linux/arm64`, and the manifest lists both. No arm64
+  container was started on an arm64 machine. See `docs/STATUS.md`.
 
 ## Re-running
 
