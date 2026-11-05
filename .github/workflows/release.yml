@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist "$HOME/.cache/plantwin-go"
-          for target in linux/amd64 linux/arm64 darwin/arm64; do
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
             os="${target%/*}"
             arch="${target#*/}"
             docker run --rm --user "$(id -u):$(id -g)" \
@@ -42,11 +42,15 @@ jobs:
         run: |
           set -euo pipefail
           cd dist
-          mkdir pkg
-          cp plantwin_linux_amd64 pkg/plantwin
-          tar -C pkg -czf plantwin_linux_amd64.tar.gz plantwin
-          sha256sum plantwin_linux_amd64.tar.gz plantwin_linux_amd64 plantwin_linux_arm64 plantwin_darwin_arm64 > checksums.txt
-          rm -rf pkg
+          # One tarball per Linux architecture, named as the Action expects. Each holds a single file: plantwin.
+          for arch in amd64 arm64; do
+            mkdir pkg
+            cp "plantwin_linux_${arch}" pkg/plantwin
+            tar -C pkg -czf "plantwin_linux_${arch}.tar.gz" plantwin
+            rm -rf pkg
+          done
+          sha256sum plantwin_linux_amd64.tar.gz plantwin_linux_arm64.tar.gz \
+            plantwin_linux_amd64 plantwin_linux_arm64 plantwin_darwin_amd64 plantwin_darwin_arm64 > checksums.txt
           cat checksums.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

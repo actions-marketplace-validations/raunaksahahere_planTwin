@@ -4,7 +4,7 @@
 
 PlanTwin shows how a migration or query change alters the plans PostgreSQL would choose in production, before the change is merged. It runs in CI against an empty PostgreSQL 18 database that has been given production's statistics, so the planner reasons about production-sized tables without any production data leaving the replica.
 
-> **Status: v0.1.2 released.** The engine, CLI, extension and benchmarks are implemented and tested. CI passes on `main`. The signed binaries, the multi-architecture image and the GitHub Action were verified from outside the build; the results and the known issues of earlier tags are in [docs/STATUS.md](docs/STATUS.md).
+> **Status: v0.1.3 released; v1.0.0 is prepared but not yet tagged.** The engine, CLI, extension and benchmarks are implemented and tested. The signed binaries, the multi-architecture image and the GitHub Action were verified from outside the build for earlier tags. The 1.0.0 gates are still open. See [docs/STATUS.md](docs/STATUS.md) for what has run and what has not, and [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for what 1.x will keep stable.
 
 ---
 

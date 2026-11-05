@@ -1,6 +1,7 @@
 # Status
 
-Last updated: 2026-11-05. Current release: **v0.1.3**.
+Last updated: 2026-11-05. Current release: **v0.1.3**. **v1.0.0 is prepared but not committed, tagged or released**;
+see the section below for the gates that are still open.
 
 ## Releases
 
@@ -12,6 +13,32 @@ Last updated: 2026-11-05. Current release: **v0.1.3**.
 | [v0.1.3](https://github.com/raunaksahahere/planTwin/releases/tag/v0.1.3) | [41981013377](https://github.com/raunaksahahere/planTwin/actions/runs/41981013377) | Marketplace branding metadata for the Action. No change to the CLI or the image. | None known. |
 
 Tags are never moved or deleted. Each release fixed the previous one's problem as the next patch version.
+
+## v1.0.0: prepared, not tagged
+
+The 1.0.0 changes are in the working tree. They are not committed, pushed or tagged. The gates are defined in
+[ADR-0014](decisions/0014-one-point-zero-readiness.md). The gates that run on this machine have run, on the working tree,
+on 2026-11-05. The gates that need a push or a tag have not.
+
+| Gate | Result | Evidence |
+|---|---|---|
+| `make check` | **Passed locally** | gofmt, `go vet` (with and without `-tags integration`), staticcheck 2025.1.1, all unit and golden tests, including the new configuration tests |
+| `make test-ext` | **Passed locally**, 2 of 2 | `plantwin_guard` and `plantwin_hook` on the `postgres:18` build. `plantwin_partition` is not in `REGRESS` yet |
+| `make test-integration` | **Passed locally** | demo, redaction leak, least-privilege role. The export ran its read-only session against a real server |
+| Quickstart steps, x86-64 | **Passed locally** | `make image`, `make build`, `plantwin demo`: report names `lost_index`, result failing |
+| `actionlint` 1.7.7 on the three workflows | **Passed locally** | |
+| Action install step | **Passed against `v0.1.3`** | the install block from `action.yml`, run against the published `v0.1.3` release: checksum OK, binary runs, installs under `RUNNER_TEMP`, checkout untouched. Not yet run against `v1.0.0` |
+| `plantwin check --timeout` | **Passed locally** | a 1 ns limit stops the run with the timeout message and exit code 2 |
+| DSN parse error does not print the password | **Passed locally** | malformed DSN with a known password: the password is absent with and without `--verbose` |
+| CI on `main` | **Not run** | needs a push |
+| Quickstart on `ubuntu-24.04-arm` | **Not run** | no arm64 machine here |
+| Examples against `v1.0.0`, both architectures | **Not run** | needs the release |
+| Release and outside verification | **Not run** | needs the tag |
+
+Files changed for 1.0.0 and not yet committed: `internal/config/config.go` and its test, `internal/export/export.go`,
+`cmd/plantwin/main.go`, `cmd/plantwin/commands.go`, `action.yml`, `.github/workflows/{ci,release,examples}.yml`,
+`ext/plantwin/Makefile`, `ext/plantwin/sql/plantwin_partition.sql` (new), `CHANGELOG.md`, `docs/COMPATIBILITY.md` (new),
+`docs/decisions/0014-one-point-zero-readiness.md` (new), `docs/STATUS.md`.
 
 ## Pre-tag gate (applied to each release)
 
@@ -31,7 +58,7 @@ Tags are never moved or deleted. Each release fixed the previous one's problem a
   `contents: write` to create the release, `packages: write` to push the image, `id-token: write` for keyless signing.
   Every checkout uses `persist-credentials: false`. No workflow uses `pull_request_target`.
 - **Pinned actions.** Every third-party action is pinned to a commit SHA. One exception, by design: the examples workflow
-  references this project's own Action at its tag (`raunaksahahere/planTwin@v0.1.2`), because that is the reference
+  references this project's own Action at its release tag (for example `raunaksahahere/planTwin@v1.0.0`), because that is the reference
   consumers use and the thing the job tests. See [ADR-0013](decisions/0013-ci-and-release-pipeline.md).
 - **No secrets in logs or fixtures.** Twin containers get a random password per container, and they do not use `trust`
   authentication. The least-privilege test role's password is generated per run. The Django example reads `SECRET_KEY`
@@ -68,7 +95,10 @@ Tags are never moved or deleted. Each release fixed the previous one's problem a
 - **Held-out benchmark.** The corpus rules were developed on the first 12 cases. A held-out workload is still missing.
 - **Redaction default.** `hash` changes plans for common literals on categorical columns. Keeping it as the default is a
   product decision, not a verified fact.
-- **Partition behaviour** in the extension is not covered by a regression test.
+- **Partition behaviour** in the extension is not covered by a regression test. The test is written
+  (`ext/plantwin/sql/plantwin_partition.sql`) but has no reviewed expected output and is not in `REGRESS`.
+- **The read-only export refusal** (a session where the server did not apply read-only mode) has no test. The code path
+  exists; it has not been run against a server that drops startup parameters.
 
 ## What is complete
 

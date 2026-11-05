@@ -59,3 +59,32 @@ func TestMissingFileSaysHowToFix(t *testing.T) {
 		t.Fatalf("missing config must point to `plantwin init`: %v", err)
 	}
 }
+
+// A misspelled key must not be silently ignored: the check would run with defaults and look fine.
+func TestUnknownKeyIsRejected(t *testing.T) {
+	cases := map[string]string{
+		"misspelled section": "threshold:\n  large_rows: 5\nqueries:\n  - name: q\n    sql: SELECT 1\n",
+		"misspelled nested":  "thresholds:\n  large_row: 5\nqueries:\n  - name: q\n    sql: SELECT 1\n",
+		"unknown top level":  "fail_fast: true\nqueries:\n  - name: q\n    sql: SELECT 1\n",
+	}
+	for name, body := range cases {
+		_, err := Load(write(t, body))
+		if err == nil {
+			t.Errorf("%s: unknown key was accepted", name)
+			continue
+		}
+		if !strings.Contains(err.Error(), "plantwin.yaml") {
+			t.Errorf("%s: error does not name the file: %v", name, err)
+		}
+	}
+}
+
+func TestEmptyConfigUsesDefaults(t *testing.T) {
+	cfg, err := Load(write(t, ""))
+	if err != nil {
+		t.Fatalf("an empty file must load with defaults: %v", err)
+	}
+	if cfg.Redaction.Default != "hash" || cfg.Migrations.Tool != "sql" {
+		t.Fatalf("defaults not applied to empty file: %+v", cfg)
+	}
+}
