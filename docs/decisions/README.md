@@ -17,3 +17,4 @@ Decisions that were taken on the owner's behalf during the autonomous build are 
 | [0010](0010-estimate-new-indexes.md) | Estimating statistics for indexes the PR creates |
 | [0011](0011-bundle-format-redaction-and-signing.md) | Stats bundle format, redaction and signing |
 | [0012](0012-schema-cache.md) | The schema cache stores the schema, not the container |
+| [0013](0013-ci-and-release-pipeline.md) | CI, release and published-artifact verification |
