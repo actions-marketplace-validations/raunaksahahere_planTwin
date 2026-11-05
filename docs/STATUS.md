@@ -54,7 +54,7 @@ Tags are never moved or deleted. Each release fixed the previous one's problem a
 | Action at the tag, Django example | Verified in CI | same run: the Django migration runs in the twin, and the planted regression is reported |
 | Action at `v0.1.0` | Failed, as recorded | [run 41973503679](https://github.com/raunaksahahere/planTwin/actions/runs/41973503679) (R1) |
 | Action at `v0.1.3` (Marketplace branding) | Verified | `action.yml` at the tag has `branding`; [examples run 41981570894](https://github.com/raunaksahahere/planTwin/actions/runs/41981570894) passes for both examples |
-| GitHub Marketplace listing | **Pending, needs the web interface** | steps in [BLOCKERS](BLOCKERS.md#github-marketplace-listing-needs-the-web-interface) |
+| GitHub Marketplace listing | **Published, without a category** | listing [PlanTwin check](https://github.com/marketplace/actions/plantwin-check) links to this repository at `v0.1.3`. The listing's category list is empty, so it is not shown under any category. Adding one is the Marketplace step in [BLOCKERS](BLOCKERS.md#github-marketplace-listing-needs-the-web-interface). |
 
 ## Not verified
 
