@@ -41,9 +41,10 @@ against a production replica had no server-side guarantee of read-only access an
    benchmarks, no support for PostgreSQL versions other than 18, and no measurement on a streaming standby beyond what is
    recorded in [STATUS](../STATUS.md). A claim becomes a promise only when a recorded run supports it.
 
-8. **Test that is not yet in the regression suite stays out of it.** `ext/plantwin/sql/plantwin_partition.sql` is written
-   but is not in `REGRESS`. Adding it without a reviewed `expected/` file fails the extension job. It is added when its
-   output has been generated on PostgreSQL 18 and checked by hand.
+8. **A regression test joins the suite only with a reviewed expected output.** `ext/plantwin/sql/plantwin_partition.sql`
+   sizes two partitions through the hook. Its expected output was generated on PostgreSQL 18 with the same `pg_regress`
+   harness as CI, then checked by hand: the parent has no scan of its own, and each child is sized from its imported
+   statistics. A test added to `REGRESS` without an `expected/` file fails the extension job.
 
 **Gates for tagging v1.0.0.** All of these must hold, on the commit being tagged:
 

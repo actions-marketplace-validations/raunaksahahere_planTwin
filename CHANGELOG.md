@@ -23,6 +23,8 @@ CLI flags, exit codes, configuration keys and the JSON report's `schema_version`
 - `plantwin check --timeout` (default 30 minutes). A check that does not finish in time stops with a clear message.
 - The GitHub Action detects an x86-64 or arm64 Linux runner and installs the matching binary.
 - The quickstart and the examples workflow run on Linux x86-64 and arm64.
+- An extension regression test for partitioned tables: each partition is sized from its own imported statistics, and
+  the partitioned parent adds no scan of its own.
 
 ### Known limits
 These are unchanged from 0.1.x and are stated in [docs/limitations.md](docs/limitations.md):
