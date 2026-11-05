@@ -3,7 +3,10 @@
 A small Django project with two commits' worth of migrations. The second migration removes `orders_customer_idx`,
 which the `customer_lookup` query needs.
 
-**Status: not executed.** This example is written against Django 5.1 migration files and PlanTwin's `command`
+The foreign key is declared with `db_index=False`. Django otherwise creates its own index on every foreign key, and then
+dropping the custom index would not lose index use. That is a real Django behaviour, and it is why this example sets the option.
+
+**Status: verified in CI by the `examples` workflow.** This example is written against Django 5.1 migration files and PlanTwin's `command`
 migration tool. Django is not installed in the environment where PlanTwin was developed, so the example has not been
 run end to end. The SQL example (`examples/sql-migrations`) is the verified one. Running this example requires Python 3,
 Django 5.1 and a `DATABASE_URL` for the twin, which PlanTwin sets.
