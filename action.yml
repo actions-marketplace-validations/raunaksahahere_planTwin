@@ -27,6 +27,10 @@ inputs:
     required: false
     default: plantwin-report.md
 
+branding:
+  icon: database
+  color: blue
+
 outputs:
   report:
     description: Path to the report file.

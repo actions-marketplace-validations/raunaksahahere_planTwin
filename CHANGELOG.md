@@ -3,6 +3,12 @@
 All notable changes are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 PlanTwin follows semantic versioning from v0.1.0. The JSON report carries its own `schema_version`.
 
+## [0.1.3] - 2026-11-05
+
+### Added
+- GitHub Marketplace metadata for the Action: a `branding` block (icon and colour). No change to the CLI, the image or
+  the checks.
+
 ## [0.1.2] - 2026-11-05
 
 ### Fixed
