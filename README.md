@@ -189,6 +189,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 - **GitLab's migration pipeline** runs migrations against production-like clones.
 - Migration linters (**Squawk**, **Atlas**, **pgroll**) check DDL safety, not plan behaviour.
 
+## GitHub Action
+
+The Action is listed on the GitHub Marketplace as [PlanTwin check](https://github.com/marketplace/actions/plantwin-check). Usage is in [docs/USAGE.md](docs/USAGE.md#102-github-actions).
+
 ## Contributing and security
 
 - [CONTRIBUTING.md](CONTRIBUTING.md): development setup, pull request checklist, conventions.

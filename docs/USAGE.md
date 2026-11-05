@@ -358,7 +358,7 @@ assets below are the ones PlanTwin itself uses; see [docs/ci-triage.md](ci-triag
 
 ### 10.2 GitHub Actions
 
-The Action is published at this repository's tags. Use `v0.1.2` or later (`v0.1.0` cannot install the CLI; see
+The Action is published at this repository's tags and listed on the [GitHub Marketplace](https://github.com/marketplace/actions/plantwin-check). Use `v0.1.2` or later (`v0.1.0` cannot install the CLI; see
 [STATUS](STATUS.md)). It downloads the release binary, verifies its checksum, and runs `plantwin check`. It does **not**
 provide the twin image, so the job must make `plantwin-postgres:18` available first. The published image is public:
 
