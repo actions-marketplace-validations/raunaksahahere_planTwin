@@ -165,9 +165,6 @@ func Run(ctx context.Context, dir string, keep bool, verbose bool, version strin
 	})
 }
 
-// removeAll is a seam for tests, so they can clean up the demo directory.
-var removeAll = os.RemoveAll
-
 func copyAssets(dir string) error {
 	return fs.WalkDir(assets, "assets", func(p string, d fs.DirEntry, err error) error {
 		if err != nil {

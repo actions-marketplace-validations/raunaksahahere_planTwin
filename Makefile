@@ -8,13 +8,17 @@ GORUN = mkdir -p $(GO_CACHE_DIR) && docker run --rm --user $(UID_GID) -e HOME=/t
         -e GOCACHE=/tmp/gocache -e GOFLAGS=-mod=mod \
         -v $(CURDIR):/src -w /src -v $(GO_CACHE_DIR):/tmp/go $(GO_IMAGE) sh -c
 
-.PHONY: fmt vet test golden build image test-ext test-integration demo check
+.PHONY: fmt vet lint test golden build image test-ext test-integration demo check
 
 fmt:
 	$(GORUN) 'test -z "$$(gofmt -l ./cmd ./internal ./bench)"'
 
 vet:
-	$(GORUN) 'go vet ./...'
+	$(GORUN) 'go vet ./... && go vet -tags integration ./internal/demo ./internal/export'
+
+# staticcheck is pinned to a release and runs in the golang container, like the rest of the Go tooling (ADR-0006).
+lint:
+	$(GORUN) 'go run honnef.co/go/tools/cmd/staticcheck@2025.1.1 ./...'
 
 test:
 	$(GORUN) 'go test -count=1 ./...'
@@ -42,4 +46,4 @@ test-integration: image
 demo: build
 	./bin/plantwin demo
 
-check: fmt vet test golden
+check: fmt vet lint test golden

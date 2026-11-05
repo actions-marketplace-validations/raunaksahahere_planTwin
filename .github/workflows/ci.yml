@@ -50,3 +50,48 @@ jobs:
           persist-credentials: false
       - name: Demo, redaction and least-privilege role tests
         run: make test-integration
+
+  quickstart:
+    name: Quickstart on a clean runner (README steps, timed)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Follow the README quickstart exactly and time each step
+        run: |
+          set -euo pipefail
+          mkdir -p quickstart
+          timings=quickstart/timings.txt
+          step() {
+            local name="$1"; shift
+            local start end
+            start=$(date +%s)
+            "$@"
+            end=$(date +%s)
+            echo "${name}: $((end - start)) s" | tee -a "$timings"
+          }
+          step "make image" make image
+          step "make build" make build
+          # The demo's report must contain the planted finding; a clean-looking report is not a pass.
+          step "plantwin demo" bash -c './bin/plantwin demo > quickstart/report.md 2> quickstart/demo.err'
+          grep -q 'lost_index' quickstart/report.md
+          echo "first report contains the planted lost_index finding"
+          total=$(awk -F': ' '{ sub(/ s$/, "", $2); t += $2 } END { print t }' "$timings")
+          echo "total (seconds, measured steps only): ${total}" | tee -a "$timings"
+          {
+            echo "## Quickstart on a clean runner"
+            echo
+            echo '```'
+            cat "$timings"
+            echo '```'
+            echo
+            echo "Runner: ubuntu-24.04, commit ${GITHUB_SHA}. Images are built from scratch on this runner."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: quickstart
+          path: quickstart/
+          if-no-files-found: warn

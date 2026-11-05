@@ -8,6 +8,7 @@ package demo
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -18,7 +19,7 @@ func TestDemoFlagsDroppedIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer removeAll(dir)
+	defer os.RemoveAll(dir)
 	out, err := Run(ctx, dir, false, false, "test")
 	if err != nil {
 		t.Fatalf("demo run failed: %v", err)
