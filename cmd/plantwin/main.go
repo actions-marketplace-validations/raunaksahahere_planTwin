@@ -14,7 +14,7 @@ import (
 )
 
 // Version is set at build time with -ldflags "-X main.Version=...".
-var Version = "0.1.1"
+var Version = "0.1.2"
 
 // Exit codes. Scripts can rely on them.
 const (

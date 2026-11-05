@@ -3,6 +3,14 @@
 All notable changes are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 PlanTwin follows semantic versioning from v0.1.0. The JSON report carries its own `schema_version`.
 
+## [0.1.2] - 2026-11-05
+
+### Fixed
+- Migration tools that run a command (Django, Rails, Prisma, Alembic, Atlas) ran in the `migrations/` directory, which
+  those projects do not have, so the twin failed to migrate. A command tool now runs from the revision root. Found by
+  the examples workflow against `v0.1.1` (the Django example).
+- A failed migration command now shows the last lines of its own output, so the cause is visible without `--verbose`.
+
 ## [0.1.1] - 2026-11-05
 
 ### Fixed
