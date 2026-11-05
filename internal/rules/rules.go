@@ -261,47 +261,6 @@ func sigSet(root *plan.Node) map[string]bool {
 	return out
 }
 
-// relationRows is the largest estimated row count of any scan on the relation in the plan.
-func relationRows(root *plan.Node, relation string) float64 {
-	var best float64
-	root.Walk(func(n *plan.Node) {
-		if n.RelationName == relation && n.PlanRows > best {
-			best = n.PlanRows
-		}
-	})
-	return best
-}
-
-func hasIndex(s *shape.Shape) bool {
-	if s == nil {
-		return false
-	}
-	if s.Index != "" {
-		return true
-	}
-	for _, k := range s.Kids {
-		if hasIndex(k) {
-			return true
-		}
-	}
-	return false
-}
-
-func indexName(s *shape.Shape) string {
-	if s == nil {
-		return "(index)"
-	}
-	if s.Index != "" {
-		return s.Index
-	}
-	for _, k := range s.Kids {
-		if n := indexName(k); n != "(index)" {
-			return n
-		}
-	}
-	return "(index)"
-}
-
 // hasSeqScan reports whether a sequential scan appears anywhere in the subtree.
 func hasSeqScan(s *shape.Shape) bool {
 	return len(seqScansIn(s)) > 0

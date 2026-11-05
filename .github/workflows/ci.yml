@@ -1,5 +1,5 @@
-# CI for PlanTwin itself. Written for review; not triggered by this repository's maintainers yet.
-# Least privilege: read-only token. No pull_request_target. No secrets are used.
+# CI for PlanTwin. Least privilege: read-only token. Triggered by pull requests and pushes to main; never pull_request_target.
+# Third-party actions are pinned to commit SHAs. No secrets are used.
 name: ci
 
 on:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
       - name: Format, vet and unit tests (Go runs in the pinned golang image)
@@ -29,10 +29,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Minor versions are checked, not only the major. Confirm these tags exist before relying on the matrix.
-        pg_image: [postgres:18.6, postgres:18.5]
+        # Minor versions are checked, not only the major. Tags verified on Docker Hub: 18.6 and 18.4 exist; 18.5 does not.
+        pg_image: [postgres:18.6, postgres:18.4]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
       - name: pg_regress for the extension
@@ -45,8 +45,53 @@ jobs:
     timeout-minutes: 45
     needs: [go, extension]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
       - name: Demo, redaction and least-privilege role tests
         run: make test-integration
+
+  quickstart:
+    name: Quickstart on a clean runner (README steps, timed)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Follow the README quickstart exactly and time each step
+        run: |
+          set -euo pipefail
+          mkdir -p quickstart
+          timings=quickstart/timings.txt
+          step() {
+            local name="$1"; shift
+            local start end
+            start=$(date +%s)
+            "$@"
+            end=$(date +%s)
+            echo "${name}: $((end - start)) s" | tee -a "$timings"
+          }
+          step "make image" make image
+          step "make build" make build
+          # The demo's report must contain the planted finding; a clean-looking report is not a pass.
+          step "plantwin demo" bash -c './bin/plantwin demo > quickstart/report.md 2> quickstart/demo.err'
+          grep -q 'lost_index' quickstart/report.md
+          echo "first report contains the planted lost_index finding"
+          total=$(awk -F': ' '{ sub(/ s$/, "", $2); t += $2 } END { print t }' "$timings")
+          echo "total (seconds, measured steps only): ${total}" | tee -a "$timings"
+          {
+            echo "## Quickstart on a clean runner"
+            echo
+            echo '```'
+            cat "$timings"
+            echo '```'
+            echo
+            echo "Runner: ubuntu-24.04, commit ${GITHUB_SHA}. Images are built from scratch on this runner."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: quickstart
+          path: quickstart/
+          if-no-files-found: warn
