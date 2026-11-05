@@ -311,7 +311,7 @@ func startBoth(ctx context.Context, runID string, cfg config.Config, baseDir, he
 
 // startAndMigrate starts a twin and applies migrations, using the schema cache when the migrations are unchanged.
 func startAndMigrate(ctx context.Context, name string, cfg config.Config, dir string, opts Options) (*twin.Twin, error) {
-	migDir := filepath.Join(dir, cfg.Migrations.Path)
+	migDir := migrationDir(dir, cfg)
 	hash := ""
 	cacheFile := ""
 	if cfg.Migrations.Tool == "sql" {
@@ -348,6 +348,16 @@ func startAndMigrate(ctx context.Context, name string, cfg config.Config, dir st
 		}
 	}
 	return t, nil
+}
+
+// migrationDir returns the directory a migration tool runs in. A plain-SQL tool reads the configured directory of
+// files. A command tool (Django, Rails, ...) runs from the revision root, because its project files live there and
+// migrations.path is not used by such a tool.
+func migrationDir(root string, cfg config.Config) string {
+	if cfg.Migrations.Tool == "sql" {
+		return filepath.Join(root, cfg.Migrations.Path)
+	}
+	return root
 }
 
 type namedQuery struct {

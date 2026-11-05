@@ -163,9 +163,12 @@ func ApplyMigrations(ctx context.Context, t *Twin, tool, dir, command string) er
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
 		if err := cmd.Run(); err != nil {
-			return errs.New("The migration command failed on the twin.",
-				"Run the command by hand with DATABASE_URL pointing at a fresh database to see the full error.",
-				"command %q: %v: %s", command, err, strings.TrimSpace(stderr.String()))
+			return &errs.User{
+				What: "The migration command failed on the twin.",
+				Why:  "Its output ends with: " + lastLines(stderr.String(), 4),
+				Fix:  "Run the command by hand with DATABASE_URL pointing at a fresh database to see the full error.",
+				Err:  fmt.Errorf("command %q: %v", command, err),
+			}
 		}
 		return nil
 	}
@@ -354,3 +357,20 @@ var identRe = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
 
 // ValidIdentifier reports whether s is a plain SQL identifier. Names from config are checked before use.
 func ValidIdentifier(s string) bool { return identRe.MatchString(s) }
+
+// lastLines returns the last n non-empty lines of s, joined with " | ", for short error messages.
+func lastLines(s string, n int) string {
+	var lines []string
+	for _, l := range strings.Split(strings.TrimSpace(s), "\n") {
+		if strings.TrimSpace(l) != "" {
+			lines = append(lines, strings.TrimSpace(l))
+		}
+	}
+	if len(lines) > n {
+		lines = lines[len(lines)-n:]
+	}
+	if len(lines) == 0 {
+		return "(no output)"
+	}
+	return strings.Join(lines, " | ")
+}

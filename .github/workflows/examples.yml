@@ -18,7 +18,7 @@ on:
       tag:
         description: Release tag to test
         required: true
-        default: v0.1.1
+        default: v0.1.2
 
 permissions:
   contents: read
@@ -172,7 +172,7 @@ jobs:
 
       - name: Run the published GitHub Action at the tag (expected to report the planted regression)
         id: plantwin
-        uses: raunaksahahere/planTwin@v0.1.1
+        uses: raunaksahahere/planTwin@v0.1.2
         continue-on-error: true
         with:
           version: ${{ inputs.tag }}
