@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-05. Current release: **v0.1.2**.
+Last updated: 2026-11-05. Current release: **v0.1.3**.
 
 ## Releases
 
@@ -9,6 +9,7 @@ Last updated: 2026-11-05. Current release: **v0.1.2**.
 | [v0.1.0](https://github.com/raunaksahahere/planTwin/releases/tag/v0.1.0) | [41972680758](https://github.com/raunaksahahere/planTwin/actions/runs/41972680758) | First release. CLI, extension, image, Action. | The Action could not install the CLI (R1 in [ci-triage](ci-triage.md)). Use `v0.1.2`. The CLI and image are unaffected. |
 | [v0.1.1](https://github.com/raunaksahahere/planTwin/releases/tag/v0.1.1) | [41975627987](https://github.com/raunaksahahere/planTwin/actions/runs/41975627987) | Fix forward: the Action's install step. | Command migration tools (Django, Rails, ...) failed on the twin (R2). Use `v0.1.2`. |
 | [v0.1.2](https://github.com/raunaksahahere/planTwin/releases/tag/v0.1.2) | [41977000854](https://github.com/raunaksahahere/planTwin/actions/runs/41977000854) | Fix forward: command migration tools run from the revision root. | None known. |
+| [v0.1.3](https://github.com/raunaksahahere/planTwin/releases/tag/v0.1.3) | [41981013377](https://github.com/raunaksahahere/planTwin/actions/runs/41981013377) | Marketplace branding metadata for the Action. No change to the CLI or the image. | None known. |
 
 Tags are never moved or deleted. Each release fixed the previous one's problem as the next patch version.
 
@@ -52,6 +53,8 @@ Tags are never moved or deleted. Each release fixed the previous one's problem a
 | Action at the tag, SQL example | Verified in CI | [examples run 41978583686](https://github.com/raunaksahahere/planTwin/actions/runs/41978583686): the Action installs `v0.1.2`, the check runs, the planted finding is reported, the expected failure is asserted |
 | Action at the tag, Django example | Verified in CI | same run: the Django migration runs in the twin, and the planted regression is reported |
 | Action at `v0.1.0` | Failed, as recorded | [run 41973503679](https://github.com/raunaksahahere/planTwin/actions/runs/41973503679) (R1) |
+| Action at `v0.1.3` (Marketplace branding) | Verified | `action.yml` at the tag has `branding`; [examples run 41981570894](https://github.com/raunaksahahere/planTwin/actions/runs/41981570894) passes for both examples |
+| GitHub Marketplace listing | **Pending, needs the web interface** | steps in [BLOCKERS](BLOCKERS.md#github-marketplace-listing-needs-the-web-interface) |
 
 ## Not verified
 
