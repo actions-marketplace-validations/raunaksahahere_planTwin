@@ -1,7 +1,7 @@
 # ADR-0014: What 1.0.0 means, and the gates it must pass
 
-**Status**: proposed, 2026-11-05. It becomes accepted when v1.0.0 is tagged after the gates below pass. Until then the
-code and the CHANGELOG describe the intended 1.0.0, and [STATUS](../STATUS.md) says which gates are open.
+**Status**: accepted, 2026-11-06. v1.0.0 was tagged on `7c0de91` after the gates below passed; the results are in
+[STATUS](../STATUS.md).
 
 **Context.** Through 0.1.x PlanTwin said it was pre-1.0 and could change its flags, keys and report at any release. Teams
 that run it in CI need to know what will break and when. Two behaviours in 0.1.x were also unsafe for production use:

@@ -1,7 +1,6 @@
 # Status
 
-Last updated: 2026-11-05. Current release: **v0.1.3**. **v1.0.0 is prepared on branch `release/1.0` (pull request
-#12) but not merged, tagged or released**; see the section below for the gates that are still open.
+Last updated: 2026-11-06. Current release: **v1.0.0**, tagged on `7c0de91`. The previous release was v0.1.3.
 
 ## Releases
 
@@ -11,35 +10,28 @@ Last updated: 2026-11-05. Current release: **v0.1.3**. **v1.0.0 is prepared on b
 | [v0.1.1](https://github.com/raunaksahahere/planTwin/releases/tag/v0.1.1) | [41975627987](https://github.com/raunaksahahere/planTwin/actions/runs/41975627987) | Fix forward: the Action's install step. | Command migration tools (Django, Rails, ...) failed on the twin (R2). Use `v0.1.2`. |
 | [v0.1.2](https://github.com/raunaksahahere/planTwin/releases/tag/v0.1.2) | [41977000854](https://github.com/raunaksahahere/planTwin/actions/runs/41977000854) | Fix forward: command migration tools run from the revision root. | None known. |
 | [v0.1.3](https://github.com/raunaksahahere/planTwin/releases/tag/v0.1.3) | [41981013377](https://github.com/raunaksahahere/planTwin/actions/runs/41981013377) | Marketplace branding metadata for the Action. No change to the CLI or the image. | None known. |
+| [v1.0.0](https://github.com/raunaksahahere/planTwin/releases/tag/v1.0.0) | [42085113513](https://github.com/raunaksahahere/planTwin/actions/runs/42085113513) | First production release. Strict configuration, read-only export session, `check --timeout`, linux/arm64 and darwin/amd64 binaries, arm64 Action support. See [COMPATIBILITY](COMPATIBILITY.md). | Node 20 deprecation warning from `actions/checkout` in CI. It is a warning; the jobs pass. Follow-up: move to a checkout version that runs on Node 24. |
 
 Tags are never moved or deleted. Each release fixed the previous one's problem as the next patch version.
 
-## v1.0.0: prepared, not tagged
+## v1.0.0: released
 
-The 1.0.0 changes are on branch `release/1.0` and in pull request #12. They are not merged and not tagged. The gates are
-defined in [ADR-0014](decisions/0014-one-point-zero-readiness.md). The gates that run on this machine have run on the
-branch's contents, on 2026-11-05. The gates that need a push or a tag have not.
+Pull request [#12](https://github.com/raunaksahahere/planTwin/pull/12) was merged as `7c0de91`, and the annotated tag
+`v1.0.0` was pushed to that commit. The gates in [ADR-0014](decisions/0014-one-point-zero-readiness.md) were checked as
+follows.
 
 | Gate | Result | Evidence |
 |---|---|---|
-| `make check` | **Passed locally** | gofmt, `go vet` (with and without `-tags integration`), staticcheck 2025.1.1, all unit and golden tests, including the new configuration tests |
-| `make test-ext` | **Passed locally**, 3 of 3 | `plantwin_guard`, `plantwin_hook` and `plantwin_partition` on the `postgres:18` build. The 18.6 and 18.4 matrix runs in CI have not run yet |
-| `make test-integration` | **Passed locally** | demo, redaction leak, least-privilege role. The export ran its read-only session against a real server |
-| Quickstart steps, x86-64 | **Passed locally** | `make image`, `make build`, `plantwin demo`: report names `lost_index`, result failing |
-| `actionlint` 1.7.7 on the three workflows | **Passed locally** | |
-| Action install step | **Passed against `v0.1.3`** | the install block from `action.yml`, run against the published `v0.1.3` release: checksum OK, binary runs, installs under `RUNNER_TEMP`, checkout untouched. Not yet run against `v1.0.0` |
-| `plantwin check --timeout` | **Passed locally** | a 1 ns limit stops the run with the timeout message and exit code 2 |
-| DSN parse error does not print the password | **Passed locally** | malformed DSN with a known password: the password is absent with and without `--verbose` |
-| CI on `main` | **Not run** | needs a push |
-| Quickstart on `ubuntu-24.04-arm` | **Not run** | no arm64 machine here |
-| Examples against `v1.0.0`, both architectures | **Not run** | needs the release |
-| Release and outside verification | **Not run** | needs the tag |
+| CI on `main` | Passed | [run 42084539690](https://github.com/raunaksahahere/planTwin/actions/runs/42084539690) on `7c0de91`: Go vet and unit tests, extension on postgres:18.6 and 18.4, integration, and both quickstart jobs |
+| Quickstart on `ubuntu-24.04` and `ubuntu-24.04-arm` | Passed | the same run. The arm64 quickstart ran on GitHub's hosted arm64 runner for the first time |
+| Release workflow | Passed | [run 42085113513](https://github.com/raunaksahahere/planTwin/actions/runs/42085113513): binaries, signed multi-architecture image, GitHub Release |
+| Release files, checked from outside the build | Verified | downloaded from the release: `sha256sum -c checksums.txt` OK for all six files; `cosign verify-blob` on `checksums.txt` with identity `…/release.yml@refs/tags/v1.0.0` → `Verified OK`; the Linux amd64 binary prints `plantwin 1.0.0` |
+| Examples against `v1.0.0`, both architectures | Passed | [examples run 42086568667](https://github.com/raunaksahahere/planTwin/actions/runs/42086568667): SQL and Django examples on `ubuntu-24.04` and `ubuntu-24.04-arm`. Each job pulled the image, verified its signature at the tag, installed the release binary, ran the published Action, and asserted the planted `lost_index` regression |
+| Release notes | Checked | taken from the 1.0.0 section of the CHANGELOG; no attribution text in the notes or the tag |
 
-Files changed for 1.0.0 on `release/1.0`: `internal/config/config.go` and its test, `internal/export/export.go`,
-`cmd/plantwin/main.go`, `cmd/plantwin/commands.go`, `action.yml`, `.github/workflows/{ci,release,examples}.yml`,
-`ext/plantwin/Makefile`, `ext/plantwin/sql/plantwin_partition.sql` and `ext/plantwin/expected/plantwin_partition.out`
-(new), `CHANGELOG.md`, `docs/COMPATIBILITY.md` (new), `docs/decisions/0014-one-point-zero-readiness.md` (new),
-`docs/STATUS.md`, `docs/USAGE.md`, `README.md`, `action/gitlab-ci.yml`.
+Gates run before the pull request, on the same contents: `make check`, `make test-ext` (3 of 3), `make test-integration`,
+the x86-64 quickstart steps, `actionlint` 1.7.7, the Action's install block against the published `v0.1.3` release, a
+1 ns `--timeout` check, and a check that a malformed DSN does not print its password. All passed.
 
 ## Pre-tag gate (applied to each release)
 
@@ -86,8 +78,8 @@ Files changed for 1.0.0 on `release/1.0`: `internal/config/config.go` and its te
 
 ## Not verified
 
-- **arm64 execution.** The arm64 image is in the manifest and was signed with the same digest, but no arm64 container was
-  started on arm64 hardware.
+- **arm64 execution.** Covered only by GitHub's hosted `ubuntu-24.04-arm` runners in CI (quickstart and examples). No
+  other arm64 hardware has been used, and no arm64 replica has been tested.
 - **The Action from another repository.** The examples workflow references the Action from this repository's examples.
   A consumer in a different repository has not been run.
 - **Real replica.** `plantwin export` and `plantwin doctor` were tested against a container that plays the replica, not
