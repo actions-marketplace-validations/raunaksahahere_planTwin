@@ -3,13 +3,15 @@
 #   include:
 #     - local: action/gitlab-ci.yml   # or the URL of this file at a reviewed tag
 #   variables:
-#     PLANTWIN_VERSION: v0.1.0
+#     PLANTWIN_VERSION: v0.1.2
 #
+# NOT RUN. It downloads the CLI from a GitLab generic package registry, which this project does not publish to. Mirror
+# the release files to a registry you control and point PLANTWIN_PROJECT_ID at it before use.
 # The job runs only on merge requests. It needs a Docker daemon (the docker:dind service) and the twin image.
 # Never give the export DSN to merge requests from forks.
 
 variables:
-  PLANTWIN_VERSION: "v0.1.0"
+  PLANTWIN_VERSION: "v0.1.2"
   PLANTWIN_BASE: "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
   DOCKER_HOST: tcp://docker:2376
   DOCKER_TLS_CERTDIR: "/certs"

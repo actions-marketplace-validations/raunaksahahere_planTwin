@@ -27,7 +27,7 @@ golden:
 	$(GORUN) 'go test -count=1 ./internal/rules -run Golden'
 
 build:
-	$(GORUN) 'go build -buildvcs=false -ldflags "-X main.Version=0.1.0" -o bin/plantwin ./cmd/plantwin'
+	$(GORUN) 'go build -buildvcs=false -o bin/plantwin ./cmd/plantwin'
 
 # Build the twin image locally. This Makefile never pushes images.
 image:

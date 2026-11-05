@@ -40,7 +40,7 @@ first.
     runs in `make check`. Both are clean. Other linters (for example golangci-lint) have not been run.
 
 11. **Django example.** Django is not installed on the development machine. The `examples` workflow installs it on the runner
-    and runs the example against the tagged release; the result is recorded in `docs/STATUS.md` once the job has run.
+    and runs the example against the tagged release. It passes at `v0.1.2` ([STATUS](STATUS.md)).
 
 12. **Real replica for `plantwin export` and `doctor`.** Export is tested against a container that plays the replica,
     including the least-privilege role. A real replica's version, extensions and size were not available.
