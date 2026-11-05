@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ("status", models.CharField(max_length=16)),
                 ("created_at", models.DateTimeField()),
                 ("total", models.DecimalField(decimal_places=2, max_digits=10)),
-                ("customer", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="shop.customer")),
+                ("customer", models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to="shop.customer")),
             ],
             options={
                 "indexes": [
