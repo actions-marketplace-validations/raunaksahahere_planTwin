@@ -2,7 +2,8 @@
 
 ## Supported versions
 
-Only the latest release receives security fixes. Before v0.1.0 is tagged, only the `main` branch is maintained.
+Only the latest release receives security fixes. From 1.0.0, that is the latest 1.x minor release (see
+[docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)).
 
 ## Reporting a vulnerability
 

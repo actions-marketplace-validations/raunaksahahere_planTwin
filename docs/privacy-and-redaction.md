@@ -46,6 +46,13 @@ What this role **can** do, and why you should think about it:
 
 PlanTwin checks the privilege before it exports and fails with the exact GRANT to run.
 
+The export also sets its own session on the server: `default_transaction_read_only` is `on`, `statement_timeout` is five
+minutes and `lock_timeout` is five seconds, and the session identifies itself as `plantwin-export` in `pg_stat_activity`.
+If the server does not apply read-only mode, for example because a connection pooler drops startup parameters, the export
+refuses to run. These settings are applied by the export itself, so they are a check on the export's behaviour, not a
+replacement for the role's grants: keep the role to the grants listed above. The refusal path has no automated test
+against a live server yet ([STATUS](STATUS.md)).
+
 ## Redaction modes
 
 Set `redaction.default` and, per column, `redaction.columns` (keys are `table.column`) in `plantwin.yaml`.
