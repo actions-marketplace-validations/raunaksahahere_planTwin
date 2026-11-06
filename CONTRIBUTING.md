@@ -32,6 +32,10 @@ make build && ./bin/plantwin demo
 4. If you changed a rule, update `docs/rules.md`, the golden files (`go test ./internal/rules -run Golden -update`,
    then review the diff), and explain the change in the pull request.
 5. If you changed a measurement, re-run the benchmark and commit the regenerated results.
+6. If the change is visible to users (a command, flag, configuration key, report field, default, or message), add a line
+   under `## [Unreleased]` in `CHANGELOG.md`. A release is refused without a CHANGELOG section for its tag.
+7. From 1.0.0, do not break anything listed as stable in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) within 1.x. A
+   change that needs it goes to the next major version.
 
 ## Commit messages
 

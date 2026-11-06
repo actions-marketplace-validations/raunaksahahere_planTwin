@@ -4,7 +4,7 @@
 
 PlanTwin shows how a migration or query change alters the plans PostgreSQL would choose in production, before the change is merged. It runs in CI against an empty PostgreSQL 18 database that has been given production's statistics, so the planner reasons about production-sized tables without any production data leaving the replica.
 
-> **Status: v0.1.3 released; v1.0.0 is prepared but not yet tagged.** The engine, CLI, extension and benchmarks are implemented and tested. The signed binaries, the multi-architecture image and the GitHub Action were verified from outside the build for earlier tags. The 1.0.0 gates are still open. See [docs/STATUS.md](docs/STATUS.md) for what has run and what has not, and [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for what 1.x will keep stable.
+> **Status: v1.0.0 released.** From 1.0.0, the CLI flags, exit codes, configuration keys and the JSON report's `schema_version` 1 stay compatible within 1.x. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the promise and what it excludes, and [docs/STATUS.md](docs/STATUS.md) for the release gates, what has run, and what has not been verified (for example, a real production replica).
 
 ---
 
@@ -52,7 +52,7 @@ flowchart LR
   RU --> REP[Markdown · JSON · SARIF<br/>exit code]
 ```
 
-1. **Export** runs on a read replica with a role that cannot read table rows. It writes a redacted, signed statistics bundle.
+1. **Export** runs on a read replica with a role that cannot read table rows. It runs in a read-only session with server-side timeouts, and writes a redacted, signed statistics bundle.
 2. **Twin** is a throwaway PostgreSQL 18 container. Migrations are applied, the statistics are imported, and a small extension (loaded only in CI) makes the planner use the imported sizes.
 3. **Compare** explains each query in a catalog on both twins, reduces each plan to its shape (operators, relations, indexes, join order), diffs the shapes, and applies rules with documented thresholds.
 
@@ -60,7 +60,7 @@ Full design: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Quick start
 
-Requirements: Docker, Git, and `make`. Go is not required; it runs in a pinned container.
+Requirements: Docker, Git, and `make`. Go is not required; it runs in a pinned container. Prebuilt CLI binaries for Linux and macOS (amd64 and arm64) are on the [releases page](https://github.com/raunaksahahere/planTwin/releases).
 
 ```bash
 make image            # build the twin image plantwin-postgres:18 (includes the extension)
@@ -92,8 +92,11 @@ plantwin check --base main --head HEAD          # in CI or locally
 | `plantwin accept <query> <rule> [relation]` | Records an accepted finding in `.plantwin/accepted.json`. |
 | `plantwin doctor` | Checks Docker, the image, the bundle, its signature and age, and the configuration. |
 | `plantwin demo` | Runs the built-in example end to end. |
+| `plantwin version` | Prints the version. |
 
 Exit codes: `0` passed, `1` findings met `fail_on`, `2` usage or configuration error, `3` Docker or Git unavailable.
+
+Unknown keys in `plantwin.yaml` are an error that names the line, so a misspelled key cannot be silently ignored. `plantwin check --timeout` (default `30m`) stops a run that does not finish.
 
 Output formats for `check`: `--format md` (PR comment, default), `json` (with `schema_version`), or `sarif` (2.1.0, for code-scanning). Full flag reference and CI examples: [docs/USAGE.md](docs/USAGE.md).
 
@@ -144,6 +147,7 @@ Reproduce: `bench/spike/` (TPC-H and JOB fidelity), `bench/corpus/run_corpus.sh`
 ## Privacy
 
 - The export reads catalogs and `pg_statistic` only. It never reads table rows. The role needs `CONNECT`, `USAGE` on the schema, and `SELECT` on `pg_statistic`. Tests confirm the role cannot read rows.
+- The export session is read-only on the server, with a five-minute statement timeout and a five-second lock timeout. If the server does not apply read-only mode (for example, behind a pooler that drops startup parameters), the export refuses to run.
 - The `pg_statistic` privilege means the role can see common values in the catalog. Treat the role as a production read credential.
 - Common values are redacted before the bundle is written. The default `hash` mode replaces them with same-type surrogates, using a per-export salt that is never stored. A test confirms that a planted common value does not appear in the bundle.
 - Bundles are signed with ed25519; `check` refuses an unsigned or modified bundle.
@@ -152,7 +156,7 @@ Details, GRANTs and measured trade-offs: [docs/privacy-and-redaction.md](docs/pr
 
 ## Limitations
 
-PlanTwin predicts plan changes from statistics. It does not execute your queries against production data, and it does not measure I/O, locks or concurrency. Extended statistics are not restored. Custom plans for specific parameter values are not compared. Only PostgreSQL 18 is supported in v0.1.
+PlanTwin predicts plan changes from statistics. It does not execute your queries against production data, and it does not measure I/O, locks or concurrency. Extended statistics are not restored. Custom plans for specific parameter values are not compared. Only PostgreSQL 18 is supported, in every 1.x release.
 
 Read [docs/limitations.md](docs/limitations.md) before relying on a clean report.
 
@@ -165,7 +169,8 @@ Read [docs/limitations.md](docs/limitations.md) before relying on a clean report
 | [docs/rules.md](docs/rules.md) | Each rule, its severity and thresholds |
 | [docs/privacy-and-redaction.md](docs/privacy-and-redaction.md) | Export role, redaction modes, measured cost |
 | [docs/limitations.md](docs/limitations.md) | What PlanTwin cannot catch |
-| [docs/decisions/](docs/decisions/) | Architecture decision records (ADR-0001 to ADR-0012) |
+| [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) | What 1.x keeps stable, what it does not promise, and how to pin a version |
+| [docs/decisions/](docs/decisions/) | Architecture decision records (ADR-0001 to ADR-0014) |
 | [docs/LEARNING.md](docs/LEARNING.md) | Planner concepts, code map, interview questions |
 | [docs/STATUS.md](docs/STATUS.md) | Release gates and their status |
 
@@ -191,7 +196,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## GitHub Action
 
-The Action is listed on the GitHub Marketplace as [PlanTwin check](https://github.com/marketplace/actions/plantwin-check). Usage is in [docs/USAGE.md](docs/USAGE.md#102-github-actions).
+The Action is listed on the GitHub Marketplace as [PlanTwin check](https://github.com/marketplace/actions/plantwin-check). Pin a release tag, for example `raunaksahahere/planTwin@v1.0.0`. Usage is in [docs/USAGE.md](docs/USAGE.md#102-github-actions).
 
 ## Contributing and security
 

@@ -74,7 +74,7 @@ the x86-64 quickstart steps, `actionlint` 1.7.7, the Action's install block agai
 | Action at the tag, Django example | Verified in CI | same run: the Django migration runs in the twin, and the planted regression is reported |
 | Action at `v0.1.0` | Failed, as recorded | [run 41973503679](https://github.com/raunaksahahere/planTwin/actions/runs/41973503679) (R1) |
 | Action at `v0.1.3` (Marketplace branding) | Verified | `action.yml` at the tag has `branding`; [examples run 41981570894](https://github.com/raunaksahahere/planTwin/actions/runs/41981570894) passes for both examples |
-| GitHub Marketplace listing | **Published, without a category** | listing [PlanTwin check](https://github.com/marketplace/actions/plantwin-check) links to this repository at `v0.1.3`. The listing's category list is empty, so it is not shown under any category. Adding one is the Marketplace step in [BLOCKERS](BLOCKERS.md#github-marketplace-listing-needs-the-web-interface). |
+| GitHub Marketplace listing | **Published, with a category** | listing [PlanTwin check](https://github.com/marketplace/actions/plantwin-check) is at release `v1.0.0`. The category was added through the steps in [BLOCKERS](BLOCKERS.md#github-marketplace-listing-needs-the-web-interface). |
 
 ## Not verified
 
@@ -101,5 +101,5 @@ the x86-64 quickstart steps, `actionlint` 1.7.7, the Action's install block agai
   redaction fidelity.
 - CI, release and examples: [ci-triage](ci-triage.md) records each failure and fix; [ADR-0013](decisions/0013-ci-and-release-pipeline.md)
   records the design.
-- Documentation: README, architecture, usage, privacy and redaction, limitations, rules, security, contributing, code of
-  conduct, changelog, ADRs 0001–0013, learning guide, quickstart verification.
+- Documentation: README, architecture, usage, compatibility promise, privacy and redaction, limitations, rules, security,
+  contributing, code of conduct, changelog, ADRs 0001–0014, learning guide, quickstart verification.
