@@ -3,6 +3,8 @@
 All notable changes are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 PlanTwin follows semantic versioning from v0.1.0. The JSON report carries its own `schema_version`.
 
+## [Unreleased]
+
 ## [1.0.0] - 2026-11-05
 
 First production release. From 1.0.0 the compatibility promise in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) applies:
@@ -92,6 +94,4 @@ before 1.0. The JSON report carries `schema_version: 1`.
 - Only PostgreSQL 18 is supported.
 - The `hash` redaction default changes plans for common literals on categorical columns (measured; see the privacy guide).
 - Benchmark recall and false-positive numbers come from a synthetic corpus whose rules were developed on part of it.
-
-## [Unreleased]
 

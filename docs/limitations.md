@@ -55,7 +55,7 @@ Redaction changes estimates for literal predicates on sensitive common values (s
 - **Tool support is partial.** `sql` (plain files, Flyway-style names) is applied directly. Django, Rails, Prisma,
   Alembic and Atlas are supported through `command` on the **host**, which must have their runtime installed.
   Repeatable Flyway migrations (`R__`) are not supported.
-- **PostgreSQL 18 only** in v0.1. The statistics import functions are PostgreSQL 18 features in this design.
+- **PostgreSQL 18 only**, in every 1.x release. The statistics import functions are PostgreSQL 18 features in this design.
 - **Docker is required** for `check`, `demo` and `doctor`. There is no daemon-less mode.
 - **Git worktrees.** `check` reads the committed revisions. Use `--head WORKTREE` to test uncommitted changes.
 - **Bundle freshness.** `doctor` warns when a bundle is older than 14 days. Statistics drift; re-export regularly.

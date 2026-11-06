@@ -36,8 +36,9 @@ integration, and troubleshooting. For the design, see [ARCHITECTURE.md](ARCHITEC
 
 ## 2. Installation
 
-Released binaries are on the [releases page](https://github.com/raunaksahahere/planTwin/releases), with `checksums.txt` and
-its signature. To build from source, clone this repository.
+Released binaries are on the [releases page](https://github.com/raunaksahahere/planTwin/releases) for linux and darwin, on
+amd64 and arm64. Each release has `checksums.txt`, with its Sigstore signature (`checksums.txt.sig`) and certificate
+(`checksums.txt.pem`). To build from source, clone this repository.
 
 **Requirements**: Docker (running), Git, and `make`. Go is not required; the build uses a pinned `golang:1.24` container.
 
@@ -172,7 +173,7 @@ plantwin check --base main --head HEAD
 | `--bundle` | `bundle.path` | Use a different bundle for this run. |
 | `--parallel` | `4` | EXPLAIN connections per twin. |
 | `--keep` | off | Keep the twin containers after the run, for debugging. |
-| `--timeout` | `30m` | Stop the check if it has not finished in this time. Use a Go duration such as `10m`. |
+| `--timeout` | `30m` | Stop the check if it has not finished in this time, and exit `2` with a message. Use a Go duration such as `10m`. |
 | `--verbose` | off | Show the underlying error for failures. |
 
 What happens, in order:
@@ -366,9 +367,8 @@ assets below are the ones PlanTwin itself uses; see [docs/ci-triage.md](ci-triag
 
 ### 10.2 GitHub Actions
 
-The Action is published at this repository's tags and listed on the [GitHub Marketplace](https://github.com/marketplace/actions/plantwin-check). Pin a released tag, for example `v1.0.0` once it is published. Do not use `v0.1.0`, which cannot install the CLI (see
-[STATUS](STATUS.md)). It downloads the release binary, verifies its checksum, and runs `plantwin check`. It does **not**
-provide the twin image, so the job must make `plantwin-postgres:18` available first. The published image is public:
+The Action is published at this repository's tags and listed on the [GitHub Marketplace](https://github.com/marketplace/actions/plantwin-check). Pin a released tag, for example `v1.0.0`. Do not use `v0.1.0` or `v0.1.1`: `v0.1.0` cannot install the CLI, and `v0.1.1` cannot run command migrations (see [STATUS](STATUS.md)). The Action downloads the release binary that matches the Linux runner (amd64 or arm64), verifies its checksum, and runs
+`plantwin check`. It does **not** provide the twin image, so the job must make `plantwin-postgres:18` available first. The published image is public:
 
 ```yaml
 name: plantwin
@@ -404,10 +404,10 @@ jobs:
 The Action's step fails when the check fails, so the job is red on a regression. The inputs are `version` (the release
 binary, default `v1.0.0`), `base`, `head`, `config`, `format` and `report`.
 
-What is verified: the examples workflow ran this Action at `v0.1.2` and `v0.1.3`, with the same input names, against a
-scratch repository it builds, with `base` set to the previous commit (`HEAD~1`). It asserts the planted regression
-([STATUS](STATUS.md)). What is not verified: the `origin/<branch>` form above, a repository other than this one, and
-`v1.0.0` until its release gates pass ([STATUS](STATUS.md)).
+What is verified: the examples workflow ran this Action at `v0.1.2`, `v0.1.3` and `v1.0.0`, with the same input names,
+against a scratch repository it builds, with `base` set to the previous commit (`HEAD~1`). It asserts the planted
+regression. For `v1.0.0` the SQL and Django examples ran on both `ubuntu-24.04` and `ubuntu-24.04-arm` ([STATUS](STATUS.md)).
+What is not verified: the `origin/<branch>` form above, and a repository other than this one.
 
 ### 10.3 GitLab CI
 

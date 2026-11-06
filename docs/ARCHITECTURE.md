@@ -41,7 +41,7 @@ flowchart LR
 
 | Boundary | What crosses it | Control |
 |---|---|---|
-| Replica → export | SELECT on catalogs and `pg_statistic` | Read-only role, no table `SELECT` (see [privacy](privacy-and-redaction.md)) |
+| Replica → export | SELECT on catalogs and `pg_statistic` | Read-only role, no table `SELECT`, and a read-only session with statement and lock timeouts (see [privacy](privacy-and-redaction.md)) |
 | Export → bundle | Redacted statistics, planner settings, server version | Redaction per column; per-export salt, never stored |
 | Bundle → repository or CI | A signed JSON document | ed25519 signature; verification fails closed |
 | CI → twins | Schema (from migrations) and bundle statistics | Twins are local, bound to `127.0.0.1`, and disposable |
@@ -143,8 +143,8 @@ their behaviour. Catalog tuples come from `SearchSysCache` and are released befo
 copied out first. The extension writes nothing to disk and changes no catalog. Its changes exist only in the current
 query's planner structures.
 
-**Scope.** Per-session `LOAD` only; never preloaded in the image (ADR-0003). Partition behaviour is not yet covered by a
-test.
+**Scope.** Per-session `LOAD` only; never preloaded in the image (ADR-0003). The `plantwin_partition` regression test
+checks that each partition is sized from its own imported statistics and that the partitioned parent adds no scan.
 
 ## 6. The twin lifecycle
 
@@ -303,8 +303,8 @@ The full statement is in [SECURITY.md](../SECURITY.md). In design terms:
 
 - Executing production queries or measuring their runtime.
 - Replacing migration linters, which check DDL safety and locks.
-- Tuning or recommending indexes (a possible future what-if mode with HypoPG is on the roadmap, not in v0.1).
-- Supporting PostgreSQL versions other than 18 in v0.1.
+- Tuning or recommending indexes (a possible future what-if mode with HypoPG is on the roadmap, not in 1.x).
+- Supporting PostgreSQL versions other than 18 in 1.x.
 
 ## 18. Known gaps
 
